@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISD 60504 - FLY ME To THE MOON | Wang Sai</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Re-apply global cursor override */
+        * { cursor: none !important; }
+
+        /* Specific styles for Project Details (Apple Style) */
+        .project-details-page {
+            padding-top: 120px; /* Accounts for fixed navbar */
+            padding-bottom: 100px;
+        }
+
+        .back-link-container {
+            max-width: 1000px;
+            margin: 0 auto 40px auto;
+            padding: 0 5%;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            transition: color 0.3s;
+        }
+
+        .btn-back:hover {
+            color: var(--accent-primary);
+        }
+
+        /* Hero Image Area */
+        .project-hero-container {
+            max-width: 1200px;
+            margin: 0 auto 80px auto;
+            padding: 0 5%;
+        }
+
+        .project-hero-image-wrapper {
+            position: relative;
+            width: 100%;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+            border: 1px solid var(--glass-border);
+            /* Aspect ratio placeholder for large hero */
+            aspect-ratio: 16 / 9;
+            background: linear-gradient(135deg, #1f1f1f 0%, #111 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .project-hero-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .play-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(10, 10, 10, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        .project-hero-image-wrapper:hover .play-overlay {
+            opacity: 1;
+        }
+
+        .btn-play-large {
+            padding: 20px 40px;
+            font-size: 1.2rem;
+            border-radius: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid var(--text-primary);
+            color: var(--text-primary);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .btn-play-large:hover {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            transform: scale(1.05);
+        }
+
+        /* Content Sections */
+        .project-content-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 5%;
+        }
+
+        .project-title {
+            font-size: clamp(3rem, 6vw, 4.5rem);
+            line-height: 1.1;
+            margin-bottom: 30px;
+            letter-spacing: -1px;
+            font-weight: 800;
+        }
+
+        h2.section-heading {
+            font-size: 2rem;
+            margin-top: 60px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--glass-border);
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .content-paragraph {
+            font-size: 1.2rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+
+        .content-paragraph strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Elegant Unordered List */
+        .apple-list {
+            list-style: none;
+            margin-bottom: 40px;
+        }
+
+        .apple-list li {
+            position: relative;
+            padding-left: 25px;
+            margin-bottom: 15px;
+            font-size: 1.15rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .apple-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--accent-primary);
+        }
+
+        .apple-list li strong {
+            color: var(--text-primary);
+        }
+
+        /* Apple Style Tech Table */
+        .tech-table-container {
+            margin-top: 40px;
+            margin-bottom: 80px;
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            background: var(--bg-surface-light);
+            backdrop-filter: blur(10px);
+        }
+
+        .tech-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .tech-table th, .tech-table td {
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .tech-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tech-table th {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            background: rgba(0,0,0,0.2);
+            width: 30%;
+        }
+
+        .tech-table td {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+        
+        .tech-table tr:hover td {
+            background: rgba(255, 87, 34, 0.05);
+            color: var(--text-primary);
+            transition: all 0.3s;
+        }
+
+        @media (max-width: 768px) {
+            .btn-play-large {
+                padding: 15px 30px;
+                font-size: 1rem;
+            }
+            .tech-table th, .tech-table td {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Grid Pattern -->
+    <div class="bg-grid"></div>
+    <canvas id="bg-particles"></canvas>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-custom" id="customCursor">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4.328 1.157c-1.353-.69-2.87.5-2.522 1.996l3.633 15.688c.306 1.321 2.067 1.637 2.822.502l3.414-5.12 5.674 1.305c1.396.321 2.47-1.111 1.708-2.277l-14.73-12.094z" fill="var(--accent-primary)" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="navbar scrolled">
+        <div class="nav-container">
+            <a href="index.html" class="logo">WS<span class="accent">.</span></a>
+        </div>
+    </header>
+
+    <main class="project-details-page">
+
+        <div class="back-link-container reveal">
+            <a href="index.html#projects" class="btn-back effect-slide">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Back to Selected Works
+            </a>
+        </div>
+
+        <div class="project-content-wrapper">
+            <h1 class="project-title reveal">ISD 60504 - FLY ME To THE MOON</h1>
+        </div>
+
+        <!-- Hero Gameplay Image with Play Button -->
+        <div class="project-hero-container reveal" style="transition-delay: 0.1s;">
+            <div class="project-hero-image-wrapper">
+                <!-- Expecting user to put second picture here -> Images/project1-gameplay.jpg -->
+                <img src="Images/project1-gameplay.jpg" alt="FLY ME To THE MOON Gameplay" onerror="this.onerror=null; this.src=''; this.parentElement.innerHTML='<span style=\'color:#666\'>[Please save gameplay screenshot as Images/project1-gameplay.jpg]</span>' + this.parentElement.innerHTML;">
+                
+                <div class="play-overlay">
+                    <a href="Projects/Lighting Design/index.html" class="btn-play-large effect-pop">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3v18l15-9L5 3z"/></svg>
+                        Play Now
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Details Content -->
+        <div class="project-content-wrapper">
+            
+            <h2 class="section-heading reveal">1. Project Overview</h2>
+            <p class="content-paragraph reveal">
+                An interactive 2-player game titled <strong>"ISD 60504 - FLY ME To THE MOON"</strong>, developed as an academic assignment (Bachelor, Taylor's University).
+            </p>
+            <p class="content-paragraph reveal">
+                After the initial sprint on March 13, the project was extended with <strong>projection mapping support</strong> and a <strong>background texture generation toolset</strong>.
+            </p>
+
+            <h2 class="section-heading reveal">Game Content</h2>
+            <ul class="apple-list reveal">
+                <li><strong>Player 1 (Left Half):</strong> Controls a rocket via hand tracking (webcam), flying toward the right edge to collect clean energy orbs.</li>
+                <li><strong>Player 2 (Right Half):</strong> Pilots a UFO up/down with hand tracking, firing lasers to hinder Player 1.</li>
+                <li><strong>Win Condition:</strong> Player 1 must collect 100% clean energy orbs and return to the left edge &rarr; <strong>MISSION SUCCESS</strong>.</li>
+            </ul>
+
+            <h2 class="section-heading reveal">Technology Stack</h2>
+            <div class="tech-table-container reveal">
+                <table class="tech-table">
+                    <tbody>
+                        <tr>
+                            <th>Technology</th>
+                            <th>Purpose</th>
+                        </tr>
+                        <tr>
+                            <td><strong>p5.js</strong></td>
+                            <td>Graphics rendering, physics, game loop</td>
+                        </tr>
+                        <tr>
+                            <td><strong>ml5.js (HandPose)</strong></td>
+                            <td>Real-time hand tracking via webcam</td>
+                        </tr>
+                        <tr>
+                            <td><strong>p5.sound</strong></td>
+                            <td>BGM and sound effects</td>
+                        </tr>
+                        <tr>
+                            <td><strong>HTML5 Canvas</strong></td>
+                            <td>Rendering foundation</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="reveal" style="text-align: center; margin-top: 60px;">
+                <a href="Projects/Lighting Design/index.html" class="btn btn-primary btn-large effect-ripple" style="padding: 15px 40px; font-size: 1.1rem;">
+                    Launch Game Fullscreen
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <p>&copy; <span id="year">2026</span> Wang Sai. Built with passion.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>

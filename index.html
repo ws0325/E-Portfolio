@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wang Sai - E-Portfolio</title>
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Background Grid Pattern -->
+    <div class="bg-grid"></div>
+    <canvas id="bg-particles"></canvas>
+
+    <!-- Custom Global Style override -->
+    <style>
+        * { cursor: none !important; }
+    </style>
+    <!-- Custom Cursor -->
+    <div class="cursor-custom" id="customCursor">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4.328 1.157c-1.353-.69-2.87.5-2.522 1.996l3.633 15.688c.306 1.321 2.067 1.637 2.822.502l3.414-5.12 5.674 1.305c1.396.321 2.47-1.111 1.708-2.277l-14.73-12.094z" fill="var(--accent-primary)" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo" data-i18n="logo">WS<span class="accent">.</span></a>
+            <nav class="nav-links">
+                <a href="#about" class="nav-link" data-i18n="nav_about">About</a>
+                <a href="#projects" class="nav-link" data-i18n="nav_projects">Projects</a>
+                <a href="#blog" class="nav-link" data-i18n="nav_blog">Blog</a>
+                <a href="#contact" class="nav-link" data-i18n="nav_contact">Contact</a>
+            </nav>
+            <div class="nav-actions">
+                <button class="lang-switch effect-pop" id="langToggle">EN / 中文</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="hero-section">
+            <div class="hero-bg-glow"></div>
+            <div class="section-container">
+                <div class="hero-grid">
+                    <div class="hero-content">
+                        <p class="greeting reveal" data-i18n="hero_greeting">Hello, I'm</p>
+                        <h1 class="hero-title reveal" data-i18n="hero_name">Wang Sai</h1>
+                        <h2 class="hero-subtitle reveal" data-i18n="hero_role">Creative Developer & Designer</h2>
+                        <p class="hero-description reveal" data-i18n="hero_desc">I build interactive, aesthetically pleasing digital experiences crafted with precision and passion.</p>
+                        <div class="hero-actions reveal">
+                            <a href="#projects" class="btn btn-primary effect-ripple" data-i18n="hero_btn_work">View Work</a>
+                            <a href="#contact" class="btn btn-secondary effect-ripple" data-i18n="hero_btn_contact">Contact Me</a>
+                        </div>
+                        <div class="hero-socials reveal" style="margin-top: 2rem; display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: center;">
+                            <a href="https://v.douyin.com/lZBfBaUolt0/" target="_blank" class="social-link effect-bounce" style="font-size: 1.1rem; border-bottom: 1px solid transparent; padding-bottom: 2px;">Douyin</a>
+                            <a href="https://www.xiaoyuzhoufm.com/podcast/69aac1cc0af6d74eb7daeea3" target="_blank" class="social-link effect-bounce" style="font-size: 1.1rem; border-bottom: 1px solid transparent; padding-bottom: 2px;">Podcast</a>
+                        </div>
+                    </div>
+                    
+                    <!-- Integrated Visual: Avatar + Abstract Shape -->
+                    <div class="hero-visual reveal">
+                        <div class="avatar-container abstract-shape effect-spin-click">
+                            <div class="avatar-glow"></div>
+                            <img src="Images/avatar.jpg" alt="Wang Sai Profile" class="avatar-img">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about-section">
+            <div class="section-container">
+                <h2 class="section-title reveal"><span data-i18n="about_title">About Me</span> <span class="accent">.</span></h2>
+                <div class="about-grid">
+                    <div class="about-text reveal" style="grid-column: 1 / -1; max-width: 800px; margin: 0 auto; text-align: center;">
+                        <p data-i18n="about_p1">I am a passionate developer focusing on building modern web applications. I strive to create web experiences that are not only performant but also visually striking.</p>
+                        <p data-i18n="about_p2">With an eye for design and a love for code, I bridge the gap between aesthetics and functionality. Welcome to my digital portfolio.</p>
+                        <ul class="skills-list" style="justify-content: center; text-align: left;">
+                            <li data-i18n="skill_1">JavaScript (ES6+)</li>
+                            <li data-i18n="skill_2">HTML5 & UI/UX</li>
+                            <li data-i18n="skill_3">Vanilla CSS Styling</li>
+                            <li data-i18n="skill_4">Interactive Animations</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="projects-section">
+            <div class="section-container">
+                <h2 class="section-title reveal"><span data-i18n="projects_title">Selected Works</span> <span class="accent">.</span></h2>
+                <div class="projects-grid">
+                    <!-- Project Card 1 -->
+                    <div class="project-card reveal" data-tilt>
+                        <!-- Using inline style for bg image placeholder -->
+                        <div class="project-img-placeholder" style="background-image: url('Images/project1-gameplay.jpg'); background-size: cover; background-position: center;"></div>
+                        <div class="project-info">
+                            <h3 data-i18n="project_1_title">ISD 60504 - FLY ME To THE MOON</h3>
+                            <p data-i18n="project_1_desc">A 2-player interactive hand-tracking game using p5.js and ml5.js.</p>
+                            <a href="project1.html" class="project-link effect-slide" data-i18n="project_link">View Details &rarr;</a>
+                        </div>
+                    </div>
+                    <!-- Project Card 2 -->
+                    <div class="project-card reveal" data-tilt>
+                        <div class="project-img-placeholder" data-i18n="project_img2">Project 2</div>
+                        <div class="project-info">
+                            <h3 data-i18n="project_2_title">E-Commerce Interface</h3>
+                            <p data-i18n="project_2_desc">A modern shopping experience with seamless animations.</p>
+                            <a href="#" class="project-link effect-slide" data-i18n="project_link">View Project &rarr;</a>
+                        </div>
+                    </div>
+                    <!-- Project Card 3 -->
+                    <div class="project-card reveal" data-tilt>
+                        <div class="project-img-placeholder" data-i18n="project_img3">Project 3</div>
+                        <div class="project-info">
+                            <h3 data-i18n="project_3_title">Immersive Landing Page</h3>
+                            <p data-i18n="project_3_desc">An interactive product landing page using web technologies.</p>
+                            <a href="#" class="project-link effect-slide" data-i18n="project_link">View Project &rarr;</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog Layout Section (Apple Style Bento) -->
+        <section id="blog" class="blog-section">
+            <div class="section-container">
+                <h2 class="section-title reveal"><span data-i18n="blog_title">Taylor's Journey</span> <span class="accent">.</span></h2>
+                <div class="apple-bento-grid">
+                    <!-- Featured Large Bento Card -->
+                    <div class="bento-card bento-large reveal" onclick="window.open('https://wangsai0367388.blogspot.com/', '_blank');">
+                        <div class="bento-bg-gradient"></div>
+                        <img src="Images/Blogger-Logo.png" alt="Blogger Logo" class="blogger-decoration">
+                        <div class="bento-content">
+                            <span class="bento-badge" data-i18n="bento_badge">Learning Blog</span>
+                            <h3 data-i18n="bento_title">My Academic Progress</h3>
+                            <p data-i18n="bento_desc">Dive into my reflections, project documentation, and creative process developed during my time at Taylor's University.</p>
+                            <span class="bento-link" data-i18n="bento_link">Explore Blog <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                        </div>
+                        <div class="bento-visual">
+                            <!-- Abstract shapes representing knowledge -->
+                            <div class="bento-circles">
+                                <div class="b-circle c1"></div>
+                                <div class="b-circle c2"></div>
+                                <div class="b-circle c3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact-section">
+            <div class="section-container">
+                <div class="contact-content reveal">
+                    <h2 class="section-title"><span data-i18n="contact_title">Let's Connect</span> <span class="accent">.</span></h2>
+                    <p class="contact-desc" data-i18n="contact_desc">Currently open for new opportunities. Whether you have a question or just want to say hi, I'll try my best to get back to you!</p>
+                    
+                    <form id="contactForm" class="contact-form">
+                        <div class="form-group">
+                            <input type="text" id="name" required placeholder="Your Name" data-i18n-placeholder="contact_ph_name" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <input type="email" id="email" required placeholder="Your Email" data-i18n-placeholder="contact_ph_email" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <textarea id="message" required rows="5" placeholder="Your Message" data-i18n-placeholder="contact_ph_message" class="form-control"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-large effect-ripple" id="submitBtn">
+                            <span data-i18n="contact_submit">Send Message</span>
+                        </button>
+                    </form>
+                    
+                    <div class="direct-email">
+                        <p data-i18n="contact_or">Or reach out directly:</p>
+                        <a href="mailto:wangsai0325@gmail.com" class="email-link effect-slide">wangsai0325@gmail.com</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-container">
+            <p>&copy; <span id="year"></span> <span data-i18n="footer_text">Wang Sai. Built with passion.</span></p>
+            <div class="social-links">
+                <a href="#" class="social-link effect-bounce">GH</a>
+                <a href="#" class="social-link effect-bounce">LN</a>
+                <a href="https://v.douyin.com/lZBfBaUolt0/" target="_blank" class="social-link effect-bounce">DY</a>
+                <a href="https://www.xiaoyuzhoufm.com/podcast/69aac1cc0af6d74eb7daeea3" target="_blank" class="social-link effect-bounce">Podcast</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="app.js"></script>
+</body>
+</html>

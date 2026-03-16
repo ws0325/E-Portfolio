@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Background Texture Generator</title>
+    <script src="libraries/p5.min.js"></script>
+    <style>
+        body {
+            margin: 20px;
+            background-color: #0a0a0a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        
+        h1 {
+            color: #00ff99;
+        }
+        
+        button {
+            background-color: #0099ff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            margin: 10px 5px 10px 0;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        
+        button:hover {
+            background-color: #0077cc;
+        }
+        
+        .info {
+            background-color: #1a1a2e;
+            padding: 15px;
+            border-left: 4px solid #0099ff;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        
+        code {
+            background-color: #000;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #00ff99;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 Background Texture Generator</h1>
+    
+    <div class="info">
+        <h2>Instructions:</h2>
+        <ol>
+            <li>Click one of the buttons below to generate a background texture</li>
+            <li>A PNG file will be downloaded to your Downloads folder</li>
+            <li>Move the <code>bg-texture.png</code> file to the <code>image/</code> folder in your game directory</li>
+            <li>Open the main game and press <code>B</code> to toggle the background texture on/off</li>
+            <li>Press <code>T</code> in-game to check the texture status in the console</li>
+        </ol>
+    </div>
+    
+    <button onclick="generateGridTexture()">Generate Grid Texture</button>
+    <button onclick="generateStarfieldTexture()">Generate Starfield Texture</button>
+    <button onclick="generateGlitchTexture()">Generate Glitch Texture</button>
+    <button onclick="generateNeonTexture()">Generate Neon Texture</button>
+    
+    <div class="info">
+        <h2>Features Added:</h2>
+        <ul>
+            <li>✓ Prominent circles on the left and right sides of the screen</li>
+            <li>✓ Dynamic background texture support</li>
+            <li>✓ Color-coded zones (blue for P1, green for P2)</li>
+            <li>✓ Keyboard shortcuts to toggle and manage textures</li>
+            <li>✓ Multiple texture styles available</li>
+        </ul>
+    </div>
+    
+    <div class="info">
+        <h2>Keyboard Controls in Game:</h2>
+        <ul>
+            <li><code>B</code> - Toggle background texture on/off</li>
+            <li><code>T</code> - Check texture status in browser console</li>
+        </ul>
+    </div>
+    
+    <script>
+        function generateGridTexture() {
+            let w = 512, h = 512;
+            let pg = createGraphics(w, h);
+            
+            pg.background(5, 10, 25);
+            
+            // Draw grid
+            pg.stroke(0, 50, 100, 100);
+            pg.strokeWeight(1);
+            for (let i = 0; i < w; i += 32) {
+                pg.line(i, 0, i, h);
+            }
+            for (let i = 0; i < h; i += 32) {
+                pg.line(0, i, w, i);
+            }
+            
+            // Add some glowing spots
+            pg.fill(0, 150, 255, 30);
+            pg.noStroke();
+            for (let i = 0; i < 20; i++) {
+                let x = random(w);
+                let y = random(h);
+                pg.circle(x, y, random(50, 150));
+            }
+            
+            pg.canvas.toBlob(blob => {
+                downloadBlob(blob, 'bg-texture.png');
+            });
+        }
+        
+        function generateStarfieldTexture() {
+            let w = 512, h = 512;
+            let pg = createGraphics(w, h);
+            
+            pg.background(5, 10, 25);
+            
+            // Add stars
+            randomSeed(42);
+            for (let i = 0; i < 500; i++) {
+                let x = random(w);
+                let y = random(h);
+                let size = random(0.5, 2);
+                let brightness = random(100, 255);
+                
+                pg.fill(brightness);
+                pg.noStroke();
+                pg.circle(x, y, size);
+            }
+            
+            // Add nebula-like effect
+            pg.stroke(0, 150, 255, 20);
+            pg.strokeWeight(0.5);
+            for (let i = 0; i < 200; i++) {
+                pg.line(random(w), random(h), random(w), random(h));
+            }
+            
+            pg.canvas.toBlob(blob => {
+                downloadBlob(blob, 'bg-texture.png');
+            });
+        }
+        
+        function generateGlitchTexture() {
+            let w = 512, h = 512;
+            let pg = createGraphics(w, h);
+            
+            pg.background(5, 10, 25);
+            
+            // Create digital glitch effect
+            pg.stroke(0, 255, 150, 50);
+            pg.strokeWeight(1);
+            for (let i = 0; i < 100; i++) {
+                let y = random(h);
+                pg.line(0, y, w, y + random(-5, 5));
+            }
+            
+            // Add color aberration lines
+            pg.stroke(255, 0, 100, 30);
+            for (let i = 0; i < 50; i++) {
+                let y = random(h);
+                pg.line(0, y, w, y);
+            }
+            
+            // Add grid overlay
+            pg.stroke(0, 100, 200, 20);
+            pg.strokeWeight(0.5);
+            for (let i = 0; i < w; i += 16) {
+                pg.line(i, 0, i, h);
+            }
+            for (let i = 0; i < h; i += 16) {
+                pg.line(0, i, w, i);
+            }
+            
+            pg.canvas.toBlob(blob => {
+                downloadBlob(blob, 'bg-texture.png');
+            });
+        }
+        
+        function generateNeonTexture() {
+            let w = 512, h = 512;
+            let pg = createGraphics(w, h);
+            
+            pg.background(5, 10, 25);
+            
+            // Draw neon circles
+            pg.fill(0, 255, 150, 30);
+            pg.noStroke();
+            pg.circle(w/4, h/4, 200);
+            pg.circle(3*w/4, 3*h/4, 200);
+            pg.circle(w/2, h/2, 150);
+            
+            // Draw neon lines
+            pg.stroke(0, 150, 255, 50);
+            pg.strokeWeight(2);
+            pg.line(0, 0, w, h);
+            pg.line(w, 0, 0, h);
+            
+            // Add glow effect with overlapping circles
+            pg.fill(255, 0, 150, 15);
+            for (let i = 0; i < 10; i++) {
+                pg.circle(random(w), random(h), random(50, 200));
+            }
+            
+            pg.canvas.toBlob(blob => {
+                downloadBlob(blob, 'bg-texture.png');
+            });
+        }
+        
+        function downloadBlob(blob, filename) {
+            let url = window.URL.createObjectURL(blob);
+            let a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            alert('✓ Texture downloaded! Move bg-texture.png to the image/ folder');
+        }
+    </script>
+</body>
+</html>
