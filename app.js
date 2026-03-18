@@ -1,76 +1,76 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
-    // --- Custom Cursor Logic & Ambient Glow ---
-    const customCursor = document.getElementById('customCursor');
-    
-    // Create Ambient Glow Element
-    const glowDiv = document.createElement('div');
-    glowDiv.className = 'cursor-glow';
-    document.body.appendChild(glowDiv);
-    
-    let glowX = window.innerWidth / 2;
-    let glowY = window.innerHeight / 2;
-    
-    let mouseX = window.innerWidth / 2;
-    let mouseY = window.innerHeight / 2;
+
+    // --- Modern Fluid & Magnetic Cursor Logic ---
+    const cursorDot = document.getElementById('cursorDot');
+    const cursorRing = document.getElementById('cursorRing');
+
+    let mouse = { x: -100, y: -100 }; // Start off-screen
+    let ringPos = { x: -100, y: -100 };
+    let isHovering = false;
+
+    // Smooth lerp function
+    const lerp = (start, end, amount) => (1 - amount) * start + amount * end;
 
     window.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        
-        // Immediate position for custom cursor
-        customCursor.style.left = `${mouseX}px`;
-        customCursor.style.top = `${mouseY}px`;
-    });
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
 
-    // Smooth animate glow element
-    function animateGlow() {
-        glowX += (mouseX - glowX) * 0.15;
-        glowY += (mouseY - glowY) * 0.15;
-        
-        glowDiv.style.left = `${glowX}px`;
-        glowDiv.style.top = `${glowY}px`;
-
-        requestAnimationFrame(animateGlow);
-    }
-    animateGlow();
-    
-    // Hover effects for cursor on interactive elements
-    const interactiveElements = document.querySelectorAll('a, button, .project-card, .bento-card, .btn');
-    
-    interactiveElements.forEach(el => {
-        el.addEventListener('mouseenter', () => {
-            customCursor.classList.add('hover-active');
-            glowDiv.style.width = '400px';
-            glowDiv.style.height = '400px';
-            glowDiv.style.background = 'radial-gradient(circle, rgba(255, 87, 34, 0.25) 0%, transparent 70%)';
-        });
-        
-        el.addEventListener('mouseleave', () => {
-            customCursor.classList.remove('hover-active');
-            glowDiv.style.width = '300px';
-            glowDiv.style.height = '300px';
-            glowDiv.style.background = 'radial-gradient(circle, rgba(255, 87, 34, 0.15) 0%, transparent 70%)';
-        });
-    });
-    
-    // Set up button mouse tracking for spotlight effect
-    document.querySelectorAll('.btn').forEach(btn => {
-        // Encase text in a span if not already done, for z-index layering over glow
-        if(!btn.querySelector('span')) {
-            const temp = btn.innerHTML;
-            btn.innerHTML = `<span>${temp}</span>`;
+        // Immediate dot position
+        if (cursorDot) {
+            cursorDot.style.left = `${mouse.x}px`;
+            cursorDot.style.top = `${mouse.y}px`;
         }
-        
-        btn.addEventListener('mousemove', e => {
-            const rect = btn.getBoundingClientRect();
+
+        // Update CSS variables for Bento card spotlights
+        // We do this globally to avoid too many listeners
+        const cards = document.querySelectorAll('.bento-card, .btn');
+        cards.forEach(card => {
+            const rect = card.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            btn.style.setProperty('--x', `${x}px`);
-            btn.style.setProperty('--y', `${y}px`);
+            card.style.setProperty('--mouse-x', `${x}px`);
+            card.style.setProperty('--mouse-y', `${y}px`);
         });
     });
-    
+
+    // Hide/Show cursor on window leave/enter
+    document.addEventListener('mouseleave', () => {
+        cursorDot.classList.add('cursor-hidden');
+        cursorRing.classList.add('cursor-hidden');
+    });
+    document.addEventListener('mouseenter', () => {
+        cursorDot.classList.remove('cursor-hidden');
+        cursorRing.classList.remove('cursor-hidden');
+    });
+
+    // Animation loop for the ring (Fluid lag effect)
+    function animateCursor() {
+        // Smoothly follow the mouse
+        ringPos.x = lerp(ringPos.x, mouse.x, 0.15);
+        ringPos.y = lerp(ringPos.y, mouse.y, 0.15);
+
+        if (cursorRing) {
+            cursorRing.style.left = `${ringPos.x}px`;
+            cursorRing.style.top = `${ringPos.y}px`;
+        }
+
+        requestAnimationFrame(animateCursor);
+    }
+    animateCursor();
+
+    // Hover interactions for all links and buttons
+    const interactive = document.querySelectorAll('a, button, .bento-card, .effect-scale');
+    interactive.forEach(el => {
+        el.addEventListener('mouseenter', () => {
+            cursorRing.classList.add('active');
+            cursorDot.classList.add('active');
+        });
+        el.addEventListener('mouseleave', () => {
+            cursorRing.classList.remove('active');
+            cursorDot.classList.remove('active');
+        });
+    });
+
     // --- Navbar Scroll Effect ---
     const navbar = document.querySelector('.navbar');
     window.addEventListener('scroll', () => {
@@ -80,17 +80,17 @@ document.addEventListener('DOMContentLoaded', () => {
             navbar.classList.remove('scrolled');
         }
     });
-    
+
     // --- Scroll Reveal Animation (Intersection Observer) ---
     const revealElements = document.querySelectorAll('.reveal');
-    
+
     // Apple-style fade up relies on detecting when element enters view
     const revealOptions = {
         threshold: 0.15,
         rootMargin: "0px 0px -50px 0px"
     };
-    
-    const revealObserver = new IntersectionObserver(function(entries, observer) {
+
+    const revealObserver = new IntersectionObserver(function (entries, observer) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('active');
@@ -99,40 +99,40 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }, revealOptions);
-    
+
     revealElements.forEach(el => {
         revealObserver.observe(el);
     });
-    
+
     // --- Fetch Blog Posts (Blogger JSON Feed) ---
     async function loadBlogPosts() {
         const blogContainer = document.getElementById('blogContainer');
-        if(!blogContainer) return;
-        
+        if (!blogContainer) return;
+
         try {
             // Using Blogger's internal JSON feed alternative format
             const feedUrl = "https://wangsai0367388.blogspot.com/feeds/posts/default?alt=json&max-results=3";
             const response = await fetch(feedUrl);
             const data = await response.json();
             const entries = data.feed.entry || [];
-            
-            if(entries.length === 0) {
+
+            if (entries.length === 0) {
                 blogContainer.innerHTML = `<p class="text-muted" data-i18n="blog_empty">No recent posts found.</p>`;
                 return;
             }
-            
+
             let htmlToInject = '';
             entries.forEach((entry, index) => {
                 const title = entry.title.$t;
                 // Parse date
                 const publishedStr = entry.published.$t;
                 const d = new Date(publishedStr);
-                const dateStr = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
-                
+                const dateStr = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
+
                 // Find link to post
                 const linkObj = entry.link.find(l => l.rel === 'alternate');
                 const postUrl = linkObj ? linkObj.href : '#';
-                
+
                 // Create minimal snippet from content
                 const rawContent = entry.content ? entry.content.$t : (entry.summary ? entry.summary.$t : "");
                 // Strip HTML
@@ -140,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tempDiv.innerHTML = rawContent;
                 let textContent = tempDiv.textContent || tempDiv.innerText || "";
                 textContent = textContent.slice(0, 80) + '...';
-                
+
                 htmlToInject += `
                     <div class="blog-card reveal" style="transition-delay: ${index * 0.1}s;">
                         <div class="blog-date">${dateStr}</div>
@@ -150,69 +150,69 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
             });
-            
+
             blogContainer.innerHTML = htmlToInject;
-            
+
             // Re-bind intersection observer and click interactions to new elements
             document.querySelectorAll('#blogContainer .reveal').forEach(el => revealObserver.observe(el));
             attachClickEffect('#blogContainer .effect-slide', 'slide-active', 200);
-            
+
             // Make sure custom cursor hooks on new links
             document.querySelectorAll('#blogContainer a, #blogContainer .blog-card').forEach(el => {
-                el.addEventListener('mouseenter', () => { customCursor.classList.add('hover-active'); glowDiv.style.width='400px'; glowDiv.style.height='400px'; glowDiv.style.background='radial-gradient(circle, rgba(255, 87, 34, 0.25) 0%, transparent 70%)'; });
-                el.addEventListener('mouseleave', () => { customCursor.classList.remove('hover-active'); glowDiv.style.width='300px'; glowDiv.style.height='300px'; glowDiv.style.background='radial-gradient(circle, rgba(255, 87, 34, 0.15) 0%, transparent 70%)';});
+                el.addEventListener('mouseenter', () => { customCursor.classList.add('hover-active'); glowDiv.style.width = '200px'; glowDiv.style.height = '200px'; glowDiv.style.background = 'radial-gradient(circle, rgba(255, 87, 34, 0.5) 0%, rgba(255, 87, 34, 0.15) 40%, transparent 80%)'; });
+                el.addEventListener('mouseleave', () => { customCursor.classList.remove('hover-active'); glowDiv.style.width = '150px'; glowDiv.style.height = '150px'; glowDiv.style.background = 'radial-gradient(circle, rgba(255, 87, 34, 0.4) 0%, rgba(255, 87, 34, 0.1) 40%, transparent 80%)'; });
             });
-            
-        } catch(error) {
+
+        } catch (error) {
             console.error("Failed to fetch blog:", error);
             blogContainer.innerHTML = `<p class="text-muted">Error loading blog posts. Please check back later.</p>`;
         }
     }
-    
+
     // Start fetch
     loadBlogPosts();
 
     // --- Interactive Click Effects ---
     const tiltElements = document.querySelectorAll('[data-tilt]');
-    
+
     tiltElements.forEach(el => {
         el.addEventListener('mousemove', handleTilt);
         el.addEventListener('mouseleave', resetTilt);
     });
-    
+
     function handleTilt(e) {
         const el = e.currentTarget;
         const rect = el.getBoundingClientRect();
-        
+
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-        
+
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
-        
+
         // Calculate rotation based on cursor position relative to center
         // Tweak the divisor to increase/decrease tilt amount (higher = less tilt)
         const rotateX = ((centerY - y) / 10).toFixed(2);
         const rotateY = ((x - centerX) / 10).toFixed(2);
-        
+
         el.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
     }
-    
+
     function resetTilt(e) {
         const el = e.currentTarget;
         el.style.transform = `perspective(1000px) rotateX(0deg) rotateY(0deg)`;
         el.style.transition = 'transform 0.5s ease';
-        
+
         // Remove the transition after it completes to not interfere with hover tracking
         setTimeout(() => {
             el.style.transition = '';
         }, 500);
     }
-    
+
     // --- Interactive Click Effects ---
     const attachClickEffect = (selector, activeClass, duration) => {
         document.querySelectorAll(selector).forEach(el => {
-            el.addEventListener('click', function(e) {
+            el.addEventListener('click', function (e) {
                 // Remove class if it exists to allow re-triggering
                 this.classList.remove(activeClass);
                 // Trigger reflow
@@ -224,30 +224,30 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     };
-    
+
     attachClickEffect('.effect-pop', 'pop-active', 150);
     attachClickEffect('.effect-spin-click', 'spin-active', 500);
     attachClickEffect('.effect-slide', 'slide-active', 200);
     attachClickEffect('.effect-bounce', 'bounce-active', 200);
-    
+
     // Special Ripple Effect
     document.querySelectorAll('.effect-ripple').forEach(btn => {
-        btn.addEventListener('click', function(e) {
+        btn.addEventListener('click', function (e) {
             let x = e.clientX - e.target.getBoundingClientRect().left;
             let y = e.clientY - e.target.getBoundingClientRect().top;
-            
+
             let ripples = document.createElement('span');
             ripples.className = 'ripple-element';
             ripples.style.left = x + 'px';
             ripples.style.top = y + 'px';
-            
+
             const size = Math.max(this.clientWidth, this.clientHeight);
             ripples.style.width = size + 'px';
             ripples.style.height = size + 'px';
             ripples.style.transform = `translate(-50%, -50%) scale(0)`;
-            
+
             this.appendChild(ripples);
-            
+
             setTimeout(() => {
                 ripples.remove();
             }, 600);
@@ -292,17 +292,39 @@ document.addEventListener('DOMContentLoaded', () => {
             bento_desc: "Dive into my reflections, project documentation, and creative process developed during my time at Taylor's University.",
             bento_link: 'Explore Blog <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
             contact_title: "Let's Connect",
-            contact_desc: "Currently open for new opportunities. Whether you have a question or just want to say hi, I'll try my best to get back to you!",
-            contact_ph_name: "Your Name",
-            contact_ph_email: "Your Email",
-            contact_ph_message: "Your Message",
-            contact_submit: "Send Message",
-            contact_or: "Or reach out directly:",
+            contact_desc: "Click the button below to send me an email directly. I'll try my best to get back to you!",
+            contact_submit: "Email Me",
             contact_success: "Message sent! (Simulation)",
-            footer_text: "Wang Sai. Built with passion."
+            footer_text: "Wang Sai. Built with passion.",
+            // Project 1 specific translations
+            p1_back_btn: "Back to Selected Works",
+            p1_play_now: "Play Now",
+            p1_overview_title: "1. Project Overview & Context",
+            p1_overview_desc: "A real-time interactive 2-player experience developed for the ISD 60504 curriculum at Taylor's University. The project explores the intersection of computer vision (CV), digital physics, and immersive game design.",
+            p1_content_title: "Core Mechanics",
+            p1_content_p1_title: "Player 1 (Expedition):",
+            p1_content_p1_desc: "Leverages hand-tracking via Mediapipe/ML5 to navigate a rocket towards Lunar orbit.",
+            p1_content_p2_title: "Player 2 (Intervention):",
+            p1_content_p2_desc: "Utilizes vertical hand-tracking to control a defensive UFO, employing logic-based interference.",
+            p1_content_win_title: "Win Condition:",
+            p1_content_win_desc: "Player 1 must maintain 100% capacity to successfully complete the mission.",
+            p1_tech_title: "Technical Architecture & Implementation",
+            p1_tech_1_title: "1. Gesture-to-Coordinate Mapping",
+            p1_tech_1_desc: "To ensure low-latency responsiveness, raw webcam input is transformed into a normalized game-space, accommodating mirror-view ergonomics.",
+            p1_tech_2_title: "2. Dynamic Kinematics & Physics Simulation",
+            p1_tech_2_desc: "The propulsion system follows classical kinetic models, where maximum velocity is dynamically calculated as a function of the vessel's integrity (HP).",
+            p1_tech_3_title: "3. State-Driven Scene Transitions",
+            p1_tech_3_desc: "Transitions between Phases (Lunar Approach vs. Earth Return) are managed via a robust state machine, handling seamless orbit animations and perspective shifts.",
+            p1_tech_3_list_1_title: "Phase 1:",
+            p1_tech_3_list_1_desc: "Primary objective involves navigation and collection.",
+            p1_tech_3_list_2_title: "Orbit:",
+            p1_tech_3_list_2_desc: "Automated orbital mechanics provide an immersive perspective transition.",
+            p1_tech_3_list_3_title: "Phase 2:",
+            p1_tech_3_list_3_desc: "Emergency Earth return under high-stakes intervention.",
+            p1_launch_btn: "Launch Game Fullscreen"
         },
         zh: {
-            logo: "汪塞<span class='accent'>.</span>", 
+            logo: "汪塞<span class='accent'>.</span>",
             nav_about: "关于我",
             nav_projects: "项目展示",
             nav_blog: "博客",
@@ -337,25 +359,47 @@ document.addEventListener('DOMContentLoaded', () => {
             bento_desc: "深入了解我在泰莱大学（Taylor's University）期间的反思、项目文档以及创意发展过程。",
             bento_link: '阅读博客 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
             contact_title: "保持联系",
-            contact_desc: "目前正在寻找新机会。无论您有任何问题，或者只是想打个招呼，我都会尽力回复您！",
-            contact_ph_name: "您的姓名",
-            contact_ph_email: "您的邮箱地址",
-            contact_ph_message: "请填写您的留言...",
-            contact_submit: "发送留言",
-            contact_or: "或者直接通过邮箱联系我：",
+            contact_desc: "点击下方的按钮直接通过邮件与我联系。我会尽快回复您！",
+            contact_submit: "邮件联系我",
             contact_success: "留言成功发送！（演示）",
-            footer_text: "汪塞. 倾心打造."
+            footer_text: "汪塞. 倾心打造.",
+            // 项目 1 专用翻译
+            p1_back_btn: "返回精选作品",
+            p1_play_now: "立即开始",
+            p1_overview_title: "1. 项目概览与背景",
+            p1_overview_desc: "这是为泰莱大学 ISD 60504 课程开发的多人实时交互体验。该项目探索了计算机视觉（CV）、数字物理模拟与沉浸式游戏设计的交汇点。",
+            p1_content_title: "核心机制",
+            p1_content_p1_title: "玩家 1 (远征):",
+            p1_content_p1_desc: "利用 Mediapipe/ML5 手势追踪技术，操控飞船向月球轨道进发。",
+            p1_content_p2_title: "玩家 2 (干预):",
+            p1_content_p2_desc: "通过垂直方向的手势追踪控制防御 UFO，进行逻辑干扰。",
+            p1_content_win_title: "获胜条件:",
+            p1_content_win_desc: "玩家 1 必须保持 100% 的能量负载才能成功完成任务。",
+            p1_tech_title: "技术架构与实现",
+            p1_tech_1_title: "1. 手势与坐标映射",
+            p1_tech_1_desc: "为了确保低延迟响应，原始摄像头输入被转换并映射到归一化的游戏空间，并适配了镜像视觉人体工程学。",
+            p1_tech_2_title: "2. 动态运动学与物理模拟",
+            p1_tech_2_desc: "推进系统遵循经典运动学模型，其最大速度根据飞船的完好度（HP）动态计算得出。",
+            p1_tech_3_title: "3. 状态驱动的场景切换",
+            p1_tech_3_desc: "不同阶段（登月与返航）之间的切换由稳定的状态机管理，处理流畅的轨道动画与透视视角切换。",
+            p1_tech_3_list_1_title: "第一阶段:",
+            p1_tech_3_list_1_desc: "主要目标涉及航行与球体收集。",
+            p1_tech_3_list_2_title: "轨道阶段:",
+            p1_tech_3_list_2_desc: "自动化的轨道力学计算提供沉浸式的视角过渡动画。",
+            p1_tech_3_list_3_title: "第二阶段:",
+            p1_tech_3_list_3_desc: "在高压干预下的紧急返航阶段。",
+            p1_launch_btn: "全屏启动游戏"
         }
     };
 
     let currentLang = 'en';
     const langToggleBtn = document.getElementById('langToggle');
-    
+
     if (langToggleBtn) {
         langToggleBtn.addEventListener('click', () => {
             currentLang = currentLang === 'en' ? 'zh' : 'en';
             langToggleBtn.textContent = currentLang === 'en' ? 'EN / 中文' : '中文 / EN';
-            
+
             // Update all translatable elements (innerHTML)
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
@@ -363,7 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     el.innerHTML = translations[currentLang][key]; // use innerHTML to support span.accent
                 }
             });
-            
+
             // Update inputs with placeholder translations
             document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
                 const key = el.getAttribute('data-i18n-placeholder');
@@ -373,7 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-    
+
     // Initial call to set correct placeholders on load just in case
     document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
         const key = el.getAttribute('data-i18n-placeholder');
@@ -382,45 +426,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle Contact Form Submission
-    const contactForm = document.getElementById('contactForm');
-    if (contactForm) {
-        contactForm.addEventListener('submit', (e) => {
-            e.preventDefault(); // Prevent page reload
-            
-            // Create the Toast
-            const toast = document.createElement('div');
-            toast.className = 'toast-notification';
-            toast.textContent = translations[currentLang]['contact_success'] || "Message sent!";
-            document.body.appendChild(toast);
-            
-            // Trigger animation
-            setTimeout(() => {
-                toast.classList.add('show');
-            }, 10);
-            
-            // Remove Toast after a few seconds
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => {
-                    toast.remove();
-                }, 500); // Wait for transition out
-            }, 3000);
-            
-            // Highlight submit button
-            const submitBtn = document.getElementById('submitBtn');
-            if(submitBtn) {
-                const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<span style="color:#FFF;">✓ Done</span>';
-                submitBtn.style.backgroundColor = 'var(--accent-primary)';
-                
-                setTimeout(() => {
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.style.backgroundColor = '';
-                    contactForm.reset();
-                }, 3000);
-            }
-        });
-    }
+    // Handle Direct Email Tracker (Optional - No form to handle now)
 
 });
