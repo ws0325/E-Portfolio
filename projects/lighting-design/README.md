@@ -6,7 +6,7 @@
 
 ---
 
-> **Note — copy in the E-Portfolio repo**: this folder is a copy of the team repository above, kept so the game can be played from the portfolio site. Two things described below are **not included in this copy**: the projection-mapping code (`mapper.js` / p5mapper) and the `index/` week-6 snapshot (removed because its scripts were missing). For the background texture workflow, see `BACKGROUND_TEXTURE_GUIDE.md`.
+> **Note — copy in the E-Portfolio repo**: this folder is a trimmed copy of the team repository above, kept so the game can be played from the portfolio site. Some things described below are **not included in this copy**: the projection-mapping code (`mapper.js` / p5mapper), the `index/` week-6 snapshot (removed because its scripts were missing), the `Player_2_Code/` prototype (superseded by `Player2.js`), `sketch.properties` (editor settings) and the top-level `libraries/` folder (the game loads p5.js, p5.sound and ml5 from a CDN). The background texture tools sit in `tools/`; for the workflow, see `tools/BACKGROUND_TEXTURE_GUIDE.md`.
 
 ---
 
@@ -35,27 +35,25 @@ After the initial sprint on March 13, the project was extended with **projection
 ## 2. File Structure
 
 ```
-p5Projection/
-├── index.html                    # Entry point — loads p5.js, ml5.js, scripts
-├── sketch_260227b.js             # Main game logic ★
-├── Player2.js                    # Player 2 / enemy object classes
-├── mapper.js                     # 🆕 Projection mapping utility
-├── CREATE_BG_TEXTURE.js          # 🆕 Background texture generation script
-├── generate-bg-texture.html      # 🆕 Browser tool for generating BG textures
-├── BACKGROUND_TEXTURE_GUIDE.md   # 🆕 Usage guide for the texture pipeline
-├── sketch.properties             # 🆕 p5.js sketch configuration
+lighting-design/                    # this folder (upstream repo: p5Projection/)
+├── index.html                      # Entry point — loads p5.js, ml5.js, scripts
+├── sketch_260227b.js               # Main game logic ★
+├── Player2.js                      # Player 2 / enemy object classes
 ├── SoundEffect/
-│   ├── bgm.mp3                   # Background music
-│   ├── explosion.mp3             # Explosion SE
-│   └── lazer.mp3                 # Laser SE
-├── image/                        # 🆕 Image assets folder
-├── libraries/
-│   └── p5.min.js                 # Core p5.js library
-├── Player_2_Code/                # Initial Player 2 prototype (reference)
-└── index/                        # Alternative index version (Week 6 save)
+│   ├── bgm.mp3                     # Background music
+│   ├── explosion.mp3               # Explosion SE
+│   └── lazer.mp3                   # Laser SE
+├── image/                          # 🆕 Image assets folder
+└── tools/                          # 🆕 Background texture tools (not needed to play)
+    ├── generate-bg-texture.html    # Browser tool for generating BG textures
+    ├── CREATE_BG_TEXTURE.js        # Background texture generation script
+    ├── BACKGROUND_TEXTURE_GUIDE.md # Usage guide for the texture pipeline
+    └── libraries/p5.min.js         # p5.js copy used by the generator page
 ```
 
 > 🆕 = Added after the initial March 13 sprint
+>
+> Left out of this copy: `mapper.js`, `index/`, `Player_2_Code/`, `sketch.properties` and the top-level `libraries/` (see the note at the top).
 
 ---
 
@@ -195,7 +193,7 @@ Projection mapping utility for rendering the canvas onto a physical surface. Han
 
 ### `CREATE_BG_TEXTURE.js` / `generate-bg-texture.html` 🆕
 
-Standalone toolset for generating background textures outside the main game loop. See `BACKGROUND_TEXTURE_GUIDE.md` for the full usage workflow.
+Standalone toolset for generating background textures outside the main game loop. The files live in the `tools/` folder; see `tools/BACKGROUND_TEXTURE_GUIDE.md` for the full usage workflow.
 
 ---
 

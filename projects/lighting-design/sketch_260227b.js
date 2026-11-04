@@ -13,7 +13,7 @@ let moonTexture;
 let earthTexture;
 let backgroundTexture;
 
-// Optional custom background made with generate-bg-texture.html (see BACKGROUND_TEXTURE_GUIDE.md).
+// Optional custom background made with tools/generate-bg-texture.html (see tools/BACKGROUND_TEXTURE_GUIDE.md).
 // If image/bg-texture.png exists it replaces background.jpeg. B toggles the texture, T logs its status.
 const BG_TEXTURE_PATH = 'image/bg-texture.png';
 let customBgTexture = null;

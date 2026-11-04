@@ -14,10 +14,12 @@
 
 ## How to Use
 
+> Paths in this guide are relative to the game folder (`projects/lighting-design/`). This guide and the generator live in its `tools/` subfolder.
+
 ### Set up a custom background texture:
 
 1. **Generate a texture**:
-   - Open `generate-bg-texture.html` in your browser
+   - Open `tools/generate-bg-texture.html` in your browser
    - Click one of the texture generation buttons:
      - Grid Texture (classic cyberpunk grid)
      - Starfield Texture (cosmic space effect)
@@ -26,7 +28,7 @@
    - The PNG file downloads as `bg-texture.png`
 
 2. **Move the file**:
-   - Move the downloaded `bg-texture.png` to: `image/bg-texture.png`
+   - Move the downloaded `bg-texture.png` into the game's `image/` folder, so it ends up at `image/bg-texture.png` (one level above `tools/`)
 
 3. **Use it in the game**:
    - Launch (or reload) the main game (`index.html`); the texture is picked up automatically
@@ -42,15 +44,18 @@ To go back to the default background, delete `image/bg-texture.png`.
 ## File Structure
 
 ```
-Lighting Design/
+lighting-design/
 ├── index.html                      (Main game)
 ├── sketch_260227b.js               (Game code, including the background functions)
-├── generate-bg-texture.html        (Texture generator)
-├── CREATE_BG_TEXTURE.js            (Alternative generation script, run from the browser console)
-└── image/
-    ├── background.jpeg             (Default background)
-    ├── earth.png, moon.png         (Edge textures)
-    └── bg-texture.png (optional)   (Your custom background)
+├── image/
+│   ├── background.jpeg             (Default background)
+│   ├── earth.png, moon.png         (Edge textures)
+│   └── bg-texture.png (optional)   (Your custom background)
+└── tools/
+    ├── generate-bg-texture.html    (Texture generator)
+    ├── CREATE_BG_TEXTURE.js        (Alternative generation script, run from the browser console)
+    ├── BACKGROUND_TEXTURE_GUIDE.md (This guide)
+    └── libraries/p5.min.js         (p5.js copy used by the generator page)
 ```
 
 ## Customization

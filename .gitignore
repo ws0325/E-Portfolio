@@ -1,2 +1,13 @@
+# Secrets and local settings (never commit these)
 .env
+
+# Packages (this site does not use any, but the folder can appear)
 node_modules/
+
+# Vercel command-line link folder
+.vercel/
+
+# Files that Windows and macOS create by themselves
+.DS_Store
+Thumbs.db
+desktop.ini
