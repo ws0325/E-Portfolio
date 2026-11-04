@@ -1,3 +1,6 @@
+// Frames between Player 2 laser shots (4 seconds at the game's 30 fps)
+const P2_FIRE_COOLDOWN = 120;
+
 class Player2Ship {
     constructor() {
         this.x = width - 230;
@@ -25,7 +28,7 @@ class Player2Ship {
             let d = dist(indexTip.x, indexTip.y, thumbTip.x, thumbTip.y);
             if (d < 40 && this.fireCooldown <= 0) {
                 this.fire();
-                this.fireCooldown = 120;
+                this.fireCooldown = P2_FIRE_COOLDOWN;
             }
         }
 

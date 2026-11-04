@@ -56,7 +56,7 @@
         <ol>
             <li>Click one of the buttons below to generate a background texture</li>
             <li>A PNG file will be downloaded to your Downloads folder</li>
-            <li>Move the <code>bg-texture.png</code> file to the <code>image/</code> folder in your game directory</li>
+            <li>Move the <code>bg-texture.png</code> file to the <code>image/</code> folder in your game directory; the game then uses it instead of the default <code>background.jpeg</code></li>
             <li>Open the main game and press <code>B</code> to toggle the background texture on/off</li>
             <li>Press <code>T</code> in-game to check the texture status in the console</li>
         </ol>
@@ -70,9 +70,8 @@
     <div class="info">
         <h2>Features Added:</h2>
         <ul>
-            <li>✓ Prominent circles on the left and right sides of the screen</li>
+            <li>✓ Earth (left) and moon (right) textures mark the two player zones</li>
             <li>✓ Dynamic background texture support</li>
-            <li>✓ Color-coded zones (blue for P1, green for P2)</li>
             <li>✓ Keyboard shortcuts to toggle and manage textures</li>
             <li>✓ Multiple texture styles available</li>
         </ul>
@@ -87,6 +86,12 @@
     </div>
     
     <script>
+        // p5 only creates its global functions (createGraphics, random, ...) when the page
+        // defines setup() or draw(). This page doesn't need a canvas, so setup() just skips it.
+        function setup() {
+            noCanvas();
+        }
+
         function generateGridTexture() {
             let w = 512, h = 512;
             let pg = createGraphics(w, h);
@@ -221,8 +226,9 @@
             a.download = filename;
             document.body.appendChild(a);
             a.click();
-            window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
+            // Give the browser a moment to start the download before releasing the file
+            setTimeout(() => window.URL.revokeObjectURL(url), 1000);
             
             alert('✓ Texture downloaded! Move bg-texture.png to the image/ folder');
         }

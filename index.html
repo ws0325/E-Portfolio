@@ -20,7 +20,7 @@
     <header class="navbar">
         <div class="nav-container">
             <a href="#" class="logo" data-i18n="logo">WS<span class="accent">.</span></a>
-            <nav class="nav-links">
+            <nav class="nav-links" id="primaryNav">
                 <a href="#about" class="nav-link" data-i18n="nav_about">About</a>
                 <a href="#projects" class="nav-link" data-i18n="nav_projects">Projects</a>
                 <a href="#blog" class="nav-link" data-i18n="nav_blog">Blog</a>
@@ -28,6 +28,11 @@
             </nav>
             <div class="nav-actions">
                 <button class="lang-switch effect-pop" id="langToggle">EN / 中文</button>
+                <button class="nav-toggle" id="navToggle" type="button" aria-label="Menu" aria-expanded="false" aria-controls="primaryNav">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
             </div>
         </div>
     </header>
@@ -59,7 +64,7 @@
                     <div class="hero-text">
                         <div class="status-badge reveal">
                             <div class="status-dot"></div>
-                            <span class="status-text">Available for work</span>
+                            <span class="status-text" data-i18n="hero_status">Available for work</span>
                         </div>
                         <p class="greeting reveal" data-i18n="hero_greeting">Hello, I'm</p>
                         <h1 class="hero-title reveal" data-i18n="hero_name">Wang Sai</h1>

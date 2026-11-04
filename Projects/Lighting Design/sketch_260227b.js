@@ -13,6 +13,12 @@ let moonTexture;
 let earthTexture;
 let backgroundTexture;
 
+// Optional custom background made with generate-bg-texture.html (see BACKGROUND_TEXTURE_GUIDE.md).
+// If image/bg-texture.png exists it replaces background.jpeg. B toggles the texture, T logs its status.
+const BG_TEXTURE_PATH = 'image/bg-texture.png';
+let customBgTexture = null;
+let enableBgTexture = true;
+
 // --- player 2 & state ---
 let p2Ship;
 let meteorites = [];
@@ -94,6 +100,8 @@ function setup() {
   }
 
   frameRate(30); // Stable frame rate, dual-hand gesture recognition is computationally expensive
+
+  loadOptionalBgTexture();
 }
 
 // ----------------------------------------------------
@@ -127,6 +135,47 @@ function drawStars() {
     circle(s.x, s.y, s.size);
   }
   pop();
+}
+
+// Background: the custom texture if there is one, otherwise background.jpeg; plain colour when toggled off
+function drawBackground() {
+  let bgImage = customBgTexture || backgroundTexture;
+  if (enableBgTexture && bgImage) {
+    image(bgImage, 0, 0, width, height);
+  } else {
+    background(5, 10, 25);
+  }
+}
+
+// Load image/bg-texture.png only if it exists, so the game still starts without it
+function loadOptionalBgTexture() {
+  fetch(BG_TEXTURE_PATH, { method: 'HEAD' })
+    .then(response => {
+      if (response.ok) {
+        loadImage(BG_TEXTURE_PATH, img => { customBgTexture = img; });
+      }
+    })
+    .catch(() => {});
+}
+
+// Keyboard shortcuts: B = toggle the background texture, T = print texture status to the console
+function keyPressed() {
+  if (key === 'b' || key === 'B') {
+    enableBgTexture = !enableBgTexture;
+    console.log('Background texture: ' + (enableBgTexture ? 'ON' : 'OFF'));
+  } else if (key === 't' || key === 'T') {
+    logTextureStatus();
+  }
+}
+
+function logTextureStatus() {
+  let inUse = 'plain colour';
+  if (enableBgTexture) {
+    inUse = customBgTexture ? BG_TEXTURE_PATH : 'image/background.jpeg';
+  }
+  console.log('[Texture status] display: ' + (enableBgTexture ? 'ON' : 'OFF') +
+    ' | in use: ' + inUse +
+    ' | ' + BG_TEXTURE_PATH + ': ' + (customBgTexture ? 'loaded' : 'not found'));
 }
 
 // Ensure audio starts on first user interaction if blocked by browser
@@ -188,11 +237,7 @@ function draw() {
   // Healthに比例して最高速度を動的に変更する（完全に止まらないように最低速度0.2を保証）
   MAX_SPEED = 2 * max(0.5, p1Health / 100);
 
-  if (backgroundTexture) {
-    image(backgroundTexture, 0, 0, width, height);
-  } else {
-    background(5, 10, 25);
-  }
+  drawBackground();
 
   push(); // MAIN SCREEN SHAKE PUSH
   if (shakeMag > 0.1) {
@@ -779,7 +824,7 @@ function drawUI() {
   fill(40);
   rect(p2PanelX + 12, p2PanelY + 52, panelW - 24, 8, 4);
 
-  let coolRatio = p2Ship ? map(p2Ship.fireCooldown, 15, 0, 0, 1, true) : 1;
+  let coolRatio = p2Ship ? map(p2Ship.fireCooldown, P2_FIRE_COOLDOWN, 0, 0, 1, true) : 1;
   fill(150, 255, 150);
   rect(p2PanelX + 12, p2PanelY + 52, (panelW - 24) * coolRatio, 8, 4);
 

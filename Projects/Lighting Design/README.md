@@ -6,6 +6,10 @@
 
 ---
 
+> **Note — copy in the E-Portfolio repo**: this folder is a copy of the team repository above, kept so the game can be played from the portfolio site. Two things described below are **not included in this copy**: the projection-mapping code (`mapper.js` / p5mapper) and the `index/` week-6 snapshot (removed because its scripts were missing). For the background texture workflow, see `BACKGROUND_TEXTURE_GUIDE.md`.
+
+---
+
 ## 1. Project Overview
 
 An interactive 2-player game titled **"ISD 60504 - FLY ME To THE MOON"**, developed as an academic assignment (Bachelor, Taylor's University).  

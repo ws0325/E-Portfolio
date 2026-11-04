@@ -296,6 +296,58 @@ a {
     color: #fff;
 }
 
+/* Hamburger button: only shown on small screens (see the 768px media query) */
+.nav-toggle {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 40px;
+    height: 40px;
+    margin-left: 12px;
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    border-radius: 50%;
+    color: var(--text-primary);
+    cursor: none;
+    /* keep uniform with rest */
+}
+
+.nav-toggle span {
+    display: block;
+    width: 16px;
+    height: 2px;
+    border-radius: 2px;
+    background-color: currentColor;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+/* Bars turn into an X while the menu is open */
+.nav-toggle[aria-expanded="true"] span:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+}
+
+.nav-toggle[aria-expanded="true"] span:nth-child(2) {
+    opacity: 0;
+}
+
+.nav-toggle[aria-expanded="true"] span:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+}
+
+@keyframes navDropIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .nav-link {
     font-weight: 600;
     font-size: 0.9rem;
@@ -896,6 +948,15 @@ p {
         padding-right: 20px;
     }
 
+    /* Every card fills the single column (the desktop spans would otherwise add extra, squeezed columns) */
+    .bento-hero,
+    .bento-about,
+    .bento-projects,
+    .bento-contact,
+    .bento-blog {
+        grid-column: 1 / -1;
+    }
+
     .hero-bento-split {
         flex-direction: column-reverse;
         text-align: center;
@@ -904,6 +965,16 @@ p {
     .hero-actions,
     .hero-socials {
         justify-content: center;
+    }
+
+    /* On narrow screens the social icons drop below the button instead of squeezing it */
+    .hero-actions {
+        flex-wrap: wrap;
+        row-gap: 16px;
+    }
+
+    .hero-actions .btn-premium {
+        white-space: nowrap;
     }
 
     .bento-blog {
@@ -1132,7 +1203,43 @@ footer {
 
     .nav-links {
         display: none;
-        /* Hide main links on small screens for minimal Apple look, or use a hamburger menu if requested */
+    }
+
+    /* Hamburger menu: the links drop down in a glass panel under the navbar */
+    .nav-toggle {
+        display: inline-flex;
+    }
+
+    .nav-links.open {
+        display: flex;
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 5%;
+        right: 5%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 4px;
+        padding: 8px;
+        background: rgba(17, 17, 17, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        animation: navDropIn 0.25s ease;
+    }
+
+    .nav-links.open .nav-link {
+        padding: 14px 16px;
+        border-radius: 12px;
+    }
+
+    .nav-links.open .nav-link::after {
+        display: none;
+    }
+
+    .nav-links.open .nav-link:hover {
+        background: rgba(255, 255, 255, 0.05);
     }
 
     .hero-section {
