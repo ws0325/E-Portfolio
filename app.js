@@ -146,18 +146,131 @@ document.addEventListener('DOMContentLoaded', () => {
         yearEl.textContent = new Date().getFullYear();
     }
 
+    // --- Motion settings shared by the scroll parallax and the particles ---
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const smallScreen = window.matchMedia('(max-width: 768px)');
+    // Parallax strength: full on desktop, half on phones, off when the visitor asks for reduced motion
+    const parallaxStrength = () => (reducedMotion.matches ? 0 : (smallScreen.matches ? 0.5 : 1));
+
+    // --- Scroll Parallax: background grid depth + hero layers ---
+    // Only inner layers move (through the `translate` property, a CSS variable and opacity), so the
+    // cards' own hover lift and the scroll-reveal transforms are left untouched.
+    const bgGrid = document.querySelector('.bg-grid');
+    const hero = document.getElementById('hero');
+    const heroBg = hero ? hero.querySelector('.hero-node-bg') : null;
+    const heroContent = hero ? hero.querySelector('.hero-bento-split') : null;
+    const heroAvatar = hero ? hero.querySelector('.premium-avatar-container') : null;
+    const stackedHero = window.matchMedia('(max-width: 1024px)'); // the avatar sits above the text here
+    const GRID_PARALLAX = 0.2; // the dot grid follows 20% of the scroll
+    const GRID_TILE = 40;      // must match the grid's background-size in styles.css
+
+    if (bgGrid || hero) {
+        let heroEnd = 1;           // scroll position where the hero has fully left the screen
+        let lastHeroDistance = -1;
+
+        const measureHero = () => {
+            if (hero) heroEnd = Math.max(1, hero.offsetTop + hero.offsetHeight);
+            lastHeroDistance = -1;
+        };
+
+        const clearParallax = () => {
+            if (bgGrid) bgGrid.style.removeProperty('--grid-shift');
+            [heroBg, heroContent, heroAvatar].forEach(el => {
+                if (el) {
+                    el.style.translate = '';
+                    el.style.opacity = '';
+                }
+            });
+            lastHeroDistance = -1;
+        };
+
+        const updateParallax = () => {
+            const strength = parallaxStrength();
+            if (strength === 0) {
+                clearParallax();
+                return;
+            }
+            const scrollY = Math.max(0, window.scrollY);
+
+            if (bgGrid) {
+                // Slide within one tile: the pattern repeats, so it reads as endless slow movement
+                const shift = (scrollY * GRID_PARALLAX * strength) % GRID_TILE;
+                bgGrid.style.setProperty('--grid-shift', `${-shift}px`);
+            }
+
+            // Once the hero is off screen its layers stay where they are
+            const distance = Math.min(scrollY, heroEnd) * strength;
+            if (hero && distance !== lastHeroDistance) {
+                lastHeroDistance = distance;
+                // The node graph lags furthest behind, the avatar a little; the text floats up and fades
+                if (heroBg) heroBg.style.translate = `0 ${(distance * 0.45).toFixed(1)}px`;
+                if (heroAvatar) {
+                    heroAvatar.style.translate = stackedHero.matches ? '' : `0 ${(distance * 0.2).toFixed(1)}px`;
+                }
+                if (heroContent) {
+                    heroContent.style.translate = `0 ${(-distance * 0.1).toFixed(1)}px`;
+                    const progress = Math.min(1, scrollY / heroEnd);
+                    const fade = Math.min(1, Math.max(0, (progress - 0.25) / 0.75));
+                    heroContent.style.opacity = (1 - fade * 0.85).toFixed(3);
+                }
+            }
+        };
+
+        let parallaxQueued = false;
+        const queueParallax = () => {
+            if (parallaxQueued) return;
+            parallaxQueued = true;
+            requestAnimationFrame(() => {
+                parallaxQueued = false;
+                updateParallax();
+            });
+        };
+        const remeasure = () => {
+            measureHero();
+            queueParallax();
+        };
+
+        measureHero();
+        updateParallax();
+        window.addEventListener('scroll', queueParallax, { passive: true });
+        window.addEventListener('resize', remeasure);
+        [reducedMotion, smallScreen, stackedHero].forEach(query => query.addEventListener('change', remeasure));
+    }
+
     // --- Background Particles ---
-    // Slow-drifting dots with faint links between neighbours, echoing the hero node graph.
+    // Slow-drifting dots in three depth layers, with faint links between neighbours of the same layer
+    // (echoing the hero node graph). When scrolling, far layers follow less of the scroll than near ones.
     const particleCanvas = document.getElementById('bg-particles');
 
     if (particleCanvas && particleCanvas.getContext) {
         const ctx = particleCanvas.getContext('2d');
-        const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
         const LINK_DISTANCE = 130;
+        const WRAP_MARGIN = 10;
+        // Far to near: share of the dots, how much of the scroll the layer follows, dot size and brightness
+        const DEPTH_LAYERS = [
+            { share: 0.5, parallax: 0.08, rMin: 0.4, rMax: 0.9, alpha: 0.25 },
+            { share: 0.3, parallax: 0.18, rMin: 0.7, rMax: 1.4, alpha: 0.4 },
+            { share: 0.2, parallax: 0.32, rMin: 1.2, rMax: 2.0, alpha: 0.6 }
+        ];
         let particles = [];
         let viewW = 0;
         let viewH = 0;
         let rafId = 0;
+
+        const pickLayer = () => {
+            let roll = Math.random();
+            for (const layer of DEPTH_LAYERS) {
+                if (roll < layer.share) return layer;
+                roll -= layer.share;
+            }
+            return DEPTH_LAYERS[0];
+        };
+
+        // Keep a coordinate on screen (plus a small margin) by wrapping it around the edges
+        const wrap = (value, size) => {
+            const span = size + WRAP_MARGIN * 2;
+            return ((value + WRAP_MARGIN) % span + span) % span - WRAP_MARGIN;
+        };
 
         const setupParticles = () => {
             const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -170,41 +283,54 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Scale the count with screen area so phones stay light
             const count = Math.min(70, Math.round((viewW * viewH) / 20000));
-            particles = Array.from({ length: count }, () => ({
-                x: Math.random() * viewW,
-                y: Math.random() * viewH,
-                vx: (Math.random() - 0.5) * 0.3,
-                vy: (Math.random() - 0.5) * 0.3,
-                r: Math.random() * 1.5 + 0.5,
-                accent: Math.random() < 0.15
-            }));
+            particles = Array.from({ length: count }, () => {
+                const layer = pickLayer();
+                return {
+                    x: Math.random() * viewW,
+                    y: Math.random() * viewH,
+                    vx: (Math.random() - 0.5) * 0.3,
+                    vy: (Math.random() - 0.5) * 0.3,
+                    r: layer.rMin + Math.random() * (layer.rMax - layer.rMin),
+                    layer,
+                    accent: Math.random() < 0.15,
+                    sy: 0 // on-screen y after the scroll parallax
+                };
+            });
         };
 
         const drawParticles = () => {
+            // Each layer follows its own share of the scroll; wrapping keeps the screen filled
+            const scrollShift = Math.max(0, window.scrollY) * parallaxStrength();
+            for (const p of particles) {
+                p.sy = wrap(p.y - scrollShift * p.layer.parallax, viewH);
+            }
+
             ctx.clearRect(0, 0, viewW, viewH);
 
-            // Faint lines between nearby particles
+            // Faint lines between nearby particles of the same layer (nearer layers a bit brighter)
             ctx.lineWidth = 1;
             for (let i = 0; i < particles.length; i++) {
                 for (let j = i + 1; j < particles.length; j++) {
                     const a = particles[i];
                     const b = particles[j];
-                    const dist = Math.hypot(a.x - b.x, a.y - b.y);
+                    if (a.layer !== b.layer) continue;
+                    const dist = Math.hypot(a.x - b.x, a.sy - b.sy);
                     if (dist < LINK_DISTANCE) {
-                        ctx.strokeStyle = `rgba(255, 255, 255, ${0.06 * (1 - dist / LINK_DISTANCE)})`;
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${0.15 * a.layer.alpha * (1 - dist / LINK_DISTANCE)})`;
                         ctx.beginPath();
-                        ctx.moveTo(a.x, a.y);
-                        ctx.lineTo(b.x, b.y);
+                        ctx.moveTo(a.x, a.sy);
+                        ctx.lineTo(b.x, b.sy);
                         ctx.stroke();
                     }
                 }
             }
 
-            // Dots, a few of them in the accent orange
+            // Dots: bigger and brighter the nearer the layer, a few of them in the accent orange
             for (const p of particles) {
-                ctx.fillStyle = p.accent ? 'rgba(255, 87, 34, 0.7)' : 'rgba(255, 255, 255, 0.4)';
+                const alpha = p.accent ? Math.min(1, p.layer.alpha * 1.5) : p.layer.alpha;
+                ctx.fillStyle = p.accent ? `rgba(255, 87, 34, ${alpha})` : `rgba(255, 255, 255, ${alpha})`;
                 ctx.beginPath();
-                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.arc(p.x, p.sy, p.r, 0, Math.PI * 2);
                 ctx.fill();
             }
         };

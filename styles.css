@@ -50,13 +50,23 @@ body {
     left: 0;
     width: 100vw;
     height: 100vh;
+    overflow: hidden;
     pointer-events: none;
     z-index: -2;
-    background-image: radial-gradient(rgba(255, 255, 255, 0.15) 2px, transparent 2px);
-    background-size: 40px 40px;
-    /* Fading effect: solid black at top, transparent at bottom */
+    /* Fading effect: solid black at top, transparent at bottom (stays put while the dots move) */
     mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent 100%);
+}
+
+/* The dots themselves: one tile taller than the screen so app.js can slide them (--grid-shift) for scroll parallax */
+.bg-grid::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 -40px 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.15) 2px, transparent 2px);
+    background-size: 40px 40px;
+    transform: translate3d(0, var(--grid-shift, 0px), 0);
+    will-change: transform;
 }
 
 #bg-particles {
