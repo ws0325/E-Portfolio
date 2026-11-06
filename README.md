@@ -16,6 +16,10 @@ It is a small static site: plain HTML, CSS and JavaScript, with no build step. E
 
 A two-player interactive game controlled by hand tracking (p5.js and ml5.js), built with a team for a university assignment. It runs in the browser and needs a webcam. The playable copy lives in [`projects/lighting-design/`](projects/lighting-design/); its README explains the controls, the file layout and the project history.
 
+## Project: ChoraNomad 3D Room Prototype
+
+An interactive 3D prototype (Three.js) of a street-side glass work room, made for a business showcase in Multidisciplinary Project II. A visitor can book the room, pay (simulated), enter with a QR code, run a video-call session and leave. Payment, QR check and the meeting login are all simulated. Only the built files are kept in [`projects/choranomad-3d/`](projects/choranomad-3d/); the source code lives outside this repository.
+
 ## Folder structure
 
 ```text
@@ -26,7 +30,8 @@ E-Portfolio/
 ├── app.js                  Cursor, menu, parallax, particles, language switch
 ├── images/                 Pictures used by the pages
 └── projects/
-    └── lighting-design/    The playable game (has its own README)
+    ├── lighting-design/    The playable game (has its own README)
+    └── choranomad-3d/      The built 3D room prototype (Vite output)
 ```
 
 Folder and file names are lowercase, with hyphens and no spaces. Windows treats `Images` and `images` as the same folder, but web servers (including Vercel) do not, so mixed case can work on your own computer and then break online.

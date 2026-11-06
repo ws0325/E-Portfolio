@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ChoraNomad Room</title>
+    <script type="module" crossorigin src="./assets/index-VEx7oKsK.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-D-JJNQFx.css">
+  </head>
+  <body>
+    <canvas id="scene"></canvas>
+
+    <div id="ui">
+      <header class="brand">
+        <div class="logo"><span class="logo-dot"></span>ChoraNomad</div>
+        <div class="sub">Interactive room prototype</div>
+      </header>
+
+      <div class="status" id="status"></div>
+
+      <div id="hotspots"></div>
+
+      <aside id="drawer" class="drawer hidden"></aside>
+
+      <div id="modal" class="modal hidden"><div class="modal-card" id="modal-card"></div></div>
+
+      <div id="toast" class="toast"></div>
+
+      <nav class="journey" id="journey"></nav>
+
+      <div id="callbar" class="callbar hidden"></div>
+
+      <div class="demo-tools">
+        <button data-action="skipTime" id="skip-btn" disabled>Skip to 5 min left</button>
+        <button data-action="toggleQuality" id="quality-btn">Quality: High</button>
+        <button data-action="resetDemo">Reset</button>
+      </div>
+
+      <div class="loading" id="loading">Loading the room…</div>
+    </div>
+
+  </body>
+</html>
