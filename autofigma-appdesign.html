@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoFigma-AppDesign | Wang Sai</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        * {
+            cursor: none !important;
+        }
+
+        .project-details-page {
+            padding-top: 140px;
+            padding-bottom: 120px;
+            background: #0A0A0A;
+            color: #FAFAFA;
+        }
+
+        .back-link-container {
+            max-width: 900px;
+            margin: 0 auto 60px auto;
+            padding: 0 5%;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            color: #A1A1AA;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            padding: 10px 20px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-back:hover {
+            color: #FAFAFA;
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(-4px);
+        }
+
+        .project-content-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 5%;
+        }
+
+        .project-title {
+            font-size: clamp(3.5rem, 6vw, 5.5rem);
+            line-height: 1.05;
+            margin-bottom: 24px;
+            letter-spacing: -0.05em;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFFFFF 0%, #A1A1AA 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+
+        .project-subtitle {
+            font-size: 1.25rem;
+            color: #A1A1AA;
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto 60px auto;
+            line-height: 1.6;
+        }
+
+        .project-hero-container {
+            max-width: 1200px;
+            margin: 0 auto 100px auto;
+            padding: 0 5%;
+        }
+
+        .project-hero-image-wrapper {
+            position: relative;
+            width: 100%;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            aspect-ratio: 16 / 9;
+            background: #18181A;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translateZ(0);
+            /* Hardware accel for smooth rounded corners on video/img */
+        }
+
+        .project-hero-image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .project-hero-container:hover .project-hero-image-wrapper img {
+            transform: scale(1.03);
+        }
+
+        .play-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(10, 10, 10, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .project-hero-image-wrapper:hover .play-overlay {
+            opacity: 1;
+        }
+
+        .btn-play-large {
+            padding: 16px 40px;
+            font-size: 1.25rem;
+            border-radius: 999px;
+            background: #FFFFFF;
+            color: #000000;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-play-large:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 20px 40px rgba(255, 255, 255, 0.2);
+        }
+
+        h2.section-heading {
+            font-size: 2.2rem;
+            margin-top: 80px;
+            margin-bottom: 32px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            color: #FAFAFA;
+        }
+
+        .content-paragraph {
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: #A1A1AA;
+            margin-bottom: 24px;
+            font-weight: 400;
+        }
+
+        .content-paragraph strong {
+            color: #FAFAFA;
+            font-weight: 600;
+        }
+
+        .apple-list {
+            list-style: none;
+            margin-bottom: 48px;
+            padding: 0;
+        }
+
+        .apple-list li {
+            position: relative;
+            padding-left: 32px;
+            margin-bottom: 20px;
+            font-size: 1.15rem;
+            line-height: 1.6;
+            color: #A1A1AA;
+        }
+
+        .apple-list li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10px;
+            width: 18px;
+            height: 18px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FAFAFA' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+        }
+
+        .apple-list li strong {
+            color: #FAFAFA;
+        }
+
+        /* IDE-Style Code Block */
+        .premium-code-block {
+            background: #18181B;
+            /* Zinc 900 */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            margin: 32px 0 48px 0;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .premium-code-header {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            gap: 8px;
+        }
+
+        .mac-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .mac-dot-red {
+            background: #FF5F56;
+        }
+
+        .mac-dot-yellow {
+            background: #FFBD2E;
+        }
+
+        .mac-dot-green {
+            background: #27C93F;
+        }
+
+        .code-filename {
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 0.8rem;
+            color: #71717A;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        }
+
+        .code-container {
+            padding: 24px;
+            overflow-x: auto;
+        }
+
+        .code-block {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #E4E4E7;
+            margin: 0;
+        }
+
+        .code-keyword {
+            color: #F87171;
+        }
+
+        /* Red 400 */
+        .code-func {
+            color: #818CF8;
+        }
+
+        /* Indigo 400 */
+        .code-comment {
+            color: #71717A;
+            font-style: italic;
+        }
+
+        .code-string {
+            color: #34D399;
+        }
+
+        /* Emerald 400 */
+        .code-number {
+            color: #FBBF24;
+        }
+
+        /* Amber 400 */
+
+        .tech-table-container {
+            margin-top: 48px;
+            margin-bottom: 80px;
+        }
+
+        .tech-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        .tech-table th,
+        .tech-table td {
+            padding: 24px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tech-table th {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #FAFAFA;
+            width: 35%;
+            vertical-align: top;
+        }
+
+        .tech-table td {
+            font-size: 1.1rem;
+            color: #A1A1AA;
+            vertical-align: top;
+        }
+
+        @media (max-width: 768px) {
+            .project-title {
+                font-size: 2.5rem;
+            }
+
+            .tech-table th,
+            .tech-table td {
+                display: block;
+                width: 100%;
+                padding: 12px 0;
+            }
+
+            .tech-table th {
+                border-bottom: none;
+                padding-bottom: 4px;
+            }
+
+            h2.section-heading {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* AutoFigma-AppDesign page */
+        .project-hero-image-wrapper.fit {
+            aspect-ratio: auto;
+            background: #ECECEE;
+        }
+
+        .project-hero-image-wrapper.fit img {
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
+
+        .project-figure {
+            margin: 40px auto 56px auto;
+            text-align: center;
+        }
+
+        .project-figure img {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 20px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+        }
+
+        .project-figure.narrow {
+            max-width: 480px;
+        }
+
+        .project-figure figcaption {
+            margin-top: 16px;
+            font-size: 0.95rem;
+            color: #71717A;
+        }
+
+        .content-paragraph code,
+        .apple-list code {
+            font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+            font-size: 0.9em;
+            color: #FAFAFA;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        .project-note {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            color: #71717A;
+            margin-top: 64px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="cursor-dot" id="cursorDot"></div>
+    <div class="cursor-ring" id="cursorRing"></div>
+
+    <header class="navbar scrolled">
+        <div class="nav-container">
+            <a href="index.html" class="logo">WS<span class="accent">.</span></a>
+            <div class="nav-actions">
+                <button class="lang-switch effect-pop" id="langToggle">EN / 中文</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="project-details-page">
+        <div class="back-link-container reveal">
+            <a href="index.html#projects" class="btn-back effect-slide">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7" />
+                </svg>
+                <span data-i18n="p1_back_btn">Back to Selected Works</span>
+            </a>
+        </div>
+
+        <div class="project-content-wrapper">
+            <h1 class="project-title reveal" data-i18n="project_3_title">AutoFigma-AppDesign</h1>
+            <p class="project-subtitle reveal" data-i18n="p3_subtitle">Describe an app. It studies three real Behance case studies, writes a design spec where every number has a source, and draws every screen in Figma.</p>
+        </div>
+
+        <div class="project-hero-container reveal" style="transition-delay: 0.1s;">
+            <div class="project-hero-image-wrapper fit">
+                <img src="images/autofigma-overview.webp" width="1800" height="614"
+                    alt="Six screens of the demo fitness app laid out in Figma">
+            </div>
+        </div>
+
+        <div class="project-content-wrapper">
+            <h2 class="section-heading reveal" data-i18n="p1_overview_title">1. Project Context</h2>
+            <p class="content-paragraph reveal" data-i18n="p3_overview_desc">Ask an AI to “design a fitness app” with no other input and you get the average of its training data: cards inside cards, a border and a shadow on every block, purple-blue gradients and filler copy. <strong>figma-app-design-builder</strong> works the other way round. It learns from real work first, lets the person decide every style question, and only then designs, strictly by the agreed rules.</p>
+
+            <div class="tech-table-container reveal">
+                <table class="tech-table">
+                    <tr>
+                        <th data-i18n="p1_role_label">Role</th>
+                        <td data-i18n="p3_role_value">Creator: concept, skill design and the example run</td>
+                    </tr>
+                    <tr>
+                        <th data-i18n="p1_stack_label">Stack</th>
+                        <td>Claude Code Skills, Figma MCP, Python 3, Pillow</td>
+                    </tr>
+                    <tr>
+                        <th data-i18n="p3_license_label">License</th>
+                        <td data-i18n="p3_license_value">MIT, open source</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h2 class="section-heading reveal" data-i18n="p3_flow_title">2. How It Works</h2>
+            <ul class="apple-list reveal">
+                <li><strong data-i18n="p3_step0_title">0 · Brief:</strong> <span data-i18n="p3_step0_desc">Asks who the app is for, the must-have features and the feel, then drafts a site map and confirms it.</span></li>
+                <li><strong data-i18n="p3_step1_title">1 · Pick 3 on Behance:</strong> <span data-i18n="p3_step1_desc">Takes the top results from Most Appreciated, Most Viewed and Most Discussed, scores them on popularity and picks three whose styles clearly differ.</span></li>
+                <li><strong data-i18n="p3_step2_title">2 · Extract:</strong> <span data-i18n="p3_step2_desc">Uses the author’s style-guide values when there is one; everything else is measured on a grid where one cell is one design pixel.</span></li>
+                <li><strong data-i18n="p3_step3_title">3 · DESIGN.md:</strong> <span data-i18n="p3_step3_desc">Compares the three works side by side, one row per dimension, with every value sourced.</span></li>
+                <li><strong data-i18n="p3_step4_title">4 · Your choices:</strong> <span data-i18n="p3_step4_desc">2–3 rounds of multiple-choice questions; each option states exact values and where they come from.</span></li>
+                <li><strong data-i18n="p3_step5_title">5 · Figma screens:</strong> <span data-i18n="p3_step5_desc">Builds variables, text styles and components, then draws each screen and checks it against Apple HIG and Nielsen’s 10 heuristics.</span></li>
+                <li><strong data-i18n="p3_step6_title">6 · Walkthrough audit:</strong> <span data-i18n="p3_step6_desc">Walks each main task end to end and reports problems a single screen cannot show.</span></li>
+            </ul>
+
+            <h2 class="section-heading reveal" data-i18n="p3_feat_title">3. Key Features</h2>
+            <ul class="apple-list reveal">
+                <li><strong data-i18n="p3_feat1_title">Every claim has a source:</strong> <span data-i18n="p3_feat1_desc">every value and judgement carries a tag: a Behance work, a measurement, the author’s style guide, Apple HIG, Nielsen, the user’s own choice, or an honest “AI suggestion”.</span></li>
+                <li><strong data-i18n="p3_feat2_title">Three helper scripts:</strong> <span data-i18n="p3_feat2_desc"><code>rank_candidates.py</code> scores the candidate pool, <code>grid_extract.py</code> measures screens at one cell per pixel, and <code>contrast.py</code> checks WCAG contrast against the HIG thresholds.</span></li>
+                <li><strong data-i18n="p3_feat3_title">Anti-AI-look checklist:</strong> <span data-i18n="p3_feat3_desc">symptoms in visuals, structure, copy and data, with what well-regarded designs do instead. It constrains the design and doubles as the review checklist.</span></li>
+            </ul>
+
+            <figure class="project-figure narrow reveal">
+                <img src="images/autofigma-grid.webp" width="1534" height="1728" loading="lazy"
+                    alt="grid_extract.py: a labelled grid and a zoomed region of one app screen">
+                <figcaption data-i18n="p3_grid_caption">grid_extract.py: grid overview and zoom on one demo screen.</figcaption>
+            </figure>
+
+            <h2 class="section-heading reveal" data-i18n="p3_install_title">4. Install and Use</h2>
+            <p class="content-paragraph reveal" data-i18n="p3_install_desc">Install it as a Claude Code plugin, restart Claude Code, then just describe the app you want. It needs Claude Code, the Figma MCP server and a browser tool for reading Behance.</p>
+
+            <div class="premium-code-block reveal">
+                <div class="premium-code-header">
+                    <div class="mac-dot mac-dot-red"></div>
+                    <div class="mac-dot mac-dot-yellow"></div>
+                    <div class="mac-dot mac-dot-green"></div>
+                    <div class="code-filename">Claude Code</div>
+                </div>
+                <div class="code-container">
+                    <pre class="code-block">
+<span class="code-func">/plugin</span> marketplace add ws0325/AutoFigma-AppDesign
+<span class="code-func">/plugin</span> install figma-app-design-builder@autofigma-appdesign</pre>
+                </div>
+            </div>
+
+            <h2 class="section-heading reveal" data-i18n="p3_example_title">5. Example: Repwise</h2>
+            <p class="content-paragraph reveal" data-i18n="p3_example_desc">The repository includes a complete run for Repwise, a demo strength-training log: 3 Behance references chosen from 32 candidates, a sourced DESIGN.md, 18 high-fidelity Figma screens with Dark copies, and a walkthrough audit that fixed eight problems.</p>
+
+            <figure class="project-figure reveal">
+                <img src="images/autofigma-screens.webp" width="1800" height="653" loading="lazy"
+                    alt="Key screens of the Repwise demo app in Light mode">
+                <figcaption data-i18n="p3_screens_caption">Key screens of the demo app, Light mode.</figcaption>
+            </figure>
+
+            <figure class="project-figure narrow reveal">
+                <img src="images/autofigma-dark.webp" width="1600" height="2255" loading="lazy"
+                    alt="The same Repwise screens in Dark mode">
+                <figcaption data-i18n="p3_dark_caption">The same screens in Dark mode.</figcaption>
+            </figure>
+
+            <div class="reveal" style="text-align: center; margin-top: 80px;">
+                <a href="https://github.com/ws0325/AutoFigma-AppDesign" target="_blank" rel="noopener"
+                    class="btn-premium effect-ripple" data-i18n="p3_github_btn">View on GitHub</a>
+            </div>
+
+            <p class="project-note reveal" data-i18n="p3_disclaimer">Independent project, not affiliated with or endorsed by Apple, Adobe, Behance, Figma or Nielsen Norman Group. Behance works belong to their authors; the skill only studies layout patterns and measurable values.</p>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-container"
+            style="max-width: 800px; margin: 0 auto; text-align: center; padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.05);">
+            <p style="color: #71717A;">&copy; <span id="year"></span> <span data-i18n="p1_footer_text">Wang Sai. Crafted with precision.</span></p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

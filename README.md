@@ -8,6 +8,7 @@ It is a small static site: plain HTML, CSS and JavaScript, with no build step. E
 
 - **Home page** (`index.html`): hero, about, projects, contact and blog sections.
 - **Project page** (`lighting-design.html`): the write-up for *Lighting Design* ("FLY ME To THE MOON"), with a button to play the game.
+- **Project page** (`autofigma-appdesign.html`): the write-up for *AutoFigma-AppDesign*, a Claude Code skill that designs iOS apps in Figma from Behance references.
 - **English / 中文 switch**: the text is translated in the browser and the choice is remembered.
 - **Motion**: scroll parallax, a particle background, a custom cursor and click effects. Parallax and particles respect the visitor's "reduce motion" setting, and parallax is halved on phones.
 - **Responsive layout** with a mobile menu.
@@ -20,13 +21,18 @@ A two-player interactive game controlled by hand tracking (p5.js and ml5.js), bu
 
 An interactive 3D prototype (Three.js) of a street-side glass work room, made for a business showcase in Multidisciplinary Project II. A visitor can book the room, pay (simulated), enter with a QR code, run a video-call session and leave. Payment, QR check and the meeting login are all simulated. Only the built files are kept in [`projects/choranomad-3d/`](projects/choranomad-3d/); the source code lives outside this repository.
 
+## Project: AutoFigma-AppDesign
+
+A Claude Code skill that designs a whole iOS app in Figma from real Behance references, with sourced numbers and checks against Apple HIG, without the "AI look". The portfolio has a write-up page; the code lives in its own repository, [ws0325/AutoFigma-AppDesign](https://github.com/ws0325/AutoFigma-AppDesign), and the screenshots on the page come from that repo's README.
+
 ## Folder structure
 
 ```text
 E-Portfolio/
 ├── index.html              Home page
 ├── lighting-design.html    Project page for Lighting Design
-├── styles.css              Styles for both pages
+├── autofigma-appdesign.html  Project page for AutoFigma-AppDesign
+├── styles.css              Styles for all pages
 ├── app.js                  Cursor, menu, parallax, particles, language switch
 ├── images/                 Pictures used by the pages
 └── projects/
