@@ -1,85 +1,68 @@
 document.addEventListener('DOMContentLoaded', () => {
 
-    // --- Modern Fluid & Magnetic Cursor Logic ---
+    // --- Custom cursor: an orange pixel, with a square frame that trails behind it ---
     const cursorDot = document.getElementById('cursorDot');
     const cursorRing = document.getElementById('cursorRing');
-
-    let mouse = { x: -100, y: -100 }; // Start off-screen
-    let ringPos = { x: -100, y: -100 };
-    let isHovering = false;
-
-    // Smooth lerp function
+    const mouse = { x: -100, y: -100, seen: false }; // starts off-screen
     const lerp = (start, end, amount) => (1 - amount) * start + amount * end;
 
     window.addEventListener('mousemove', (e) => {
         mouse.x = e.clientX;
         mouse.y = e.clientY;
-
-        // Immediate dot position
+        mouse.seen = true;
         if (cursorDot) {
             cursorDot.style.left = `${mouse.x}px`;
             cursorDot.style.top = `${mouse.y}px`;
         }
+    }, { passive: true });
 
-        // Update CSS variables for Bento card spotlights
-        // We do this globally to avoid too many listeners
-        const cards = document.querySelectorAll('.bento-card, .btn');
-        cards.forEach(card => {
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            card.style.setProperty('--mouse-x', `${x}px`);
-            card.style.setProperty('--mouse-y', `${y}px`);
+    if (cursorDot && cursorRing) {
+        // styles.css only hides the system cursor once this class is set, so the page
+        // still has a normal cursor if this script fails to load
+        document.documentElement.classList.add('custom-cursor');
+
+        document.addEventListener('mouseleave', () => {
+            cursorDot.classList.add('cursor-hidden');
+            cursorRing.classList.add('cursor-hidden');
         });
-    });
+        document.addEventListener('mouseenter', () => {
+            cursorDot.classList.remove('cursor-hidden');
+            cursorRing.classList.remove('cursor-hidden');
+        });
 
-    // Hide/Show cursor on window leave/enter
-    document.addEventListener('mouseleave', () => {
-        cursorDot.classList.add('cursor-hidden');
-        cursorRing.classList.add('cursor-hidden');
-    });
-    document.addEventListener('mouseenter', () => {
-        cursorDot.classList.remove('cursor-hidden');
-        cursorRing.classList.remove('cursor-hidden');
-    });
-
-    // Animation loop for the ring (Fluid lag effect)
-    function animateCursor() {
-        // Smoothly follow the mouse
-        ringPos.x = lerp(ringPos.x, mouse.x, 0.15);
-        ringPos.y = lerp(ringPos.y, mouse.y, 0.15);
-
-        if (cursorRing) {
+        // The frame follows the pixel with a little lag
+        const ringPos = { x: -100, y: -100 };
+        const animateCursor = () => {
+            ringPos.x = lerp(ringPos.x, mouse.x, 0.18);
+            ringPos.y = lerp(ringPos.y, mouse.y, 0.18);
             cursorRing.style.left = `${ringPos.x}px`;
             cursorRing.style.top = `${ringPos.y}px`;
-        }
+            requestAnimationFrame(animateCursor);
+        };
+        animateCursor();
 
-        requestAnimationFrame(animateCursor);
+        // Grow over anything clickable
+        document.querySelectorAll('a, button, .carousel').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                cursorRing.classList.add('active');
+                cursorDot.classList.add('active');
+            });
+            el.addEventListener('mouseleave', () => {
+                cursorRing.classList.remove('active');
+                cursorDot.classList.remove('active');
+            });
+        });
     }
-    animateCursor();
-
-    // Hover interactions for all links and buttons
-    const interactive = document.querySelectorAll('a, button, .bento-card, .effect-scale');
-    interactive.forEach(el => {
-        el.addEventListener('mouseenter', () => {
-            cursorRing.classList.add('active');
-            cursorDot.classList.add('active');
-        });
-        el.addEventListener('mouseleave', () => {
-            cursorRing.classList.remove('active');
-            cursorDot.classList.remove('active');
-        });
-    });
 
     // --- Navbar Scroll Effect ---
+    // The home page bar is clear at the top and gains a backdrop once you scroll;
+    // project pages ship with the backdrop already on and keep it.
     const navbar = document.querySelector('.navbar');
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
-    });
+    if (navbar && !navbar.classList.contains('scrolled')) {
+        const updateNavbar = () => navbar.classList.toggle('scrolled', window.scrollY > 50);
+        updateNavbar();
+        window.addEventListener('scroll', updateNavbar, { passive: true });
+    }
 
     // --- Mobile Navigation Menu ---
     // On small screens the nav links are hidden; the hamburger button drops them down.
@@ -146,235 +129,394 @@ document.addEventListener('DOMContentLoaded', () => {
         yearEl.textContent = new Date().getFullYear();
     }
 
-    // --- Motion settings shared by the scroll parallax and the particles ---
+    // --- Motion settings shared by the background, the parallax and the carousel ---
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const smallScreen = window.matchMedia('(max-width: 768px)');
-    // Parallax strength: full on desktop, half on phones, off when the visitor asks for reduced motion
-    const parallaxStrength = () => (reducedMotion.matches ? 0 : (smallScreen.matches ? 0.5 : 1));
+    // Parallax strength: full on desktop, gentler on phones, off when the visitor asks for reduced motion
+    const parallaxStrength = () => (reducedMotion.matches ? 0 : (smallScreen.matches ? 0.6 : 1));
 
-    // --- Scroll Parallax: background grid depth + hero layers ---
-    // Only inner layers move (through the `translate` property, a CSS variable and opacity), so the
-    // cards' own hover lift and the scroll-reveal transforms are left untouched.
-    const bgGrid = document.querySelector('.bg-grid');
-    const hero = document.getElementById('hero');
-    const heroBg = hero ? hero.querySelector('.hero-node-bg') : null;
-    const heroContent = hero ? hero.querySelector('.hero-bento-split') : null;
-    const heroAvatar = hero ? hero.querySelector('.premium-avatar-container') : null;
-    const stackedHero = window.matchMedia('(max-width: 1024px)'); // the avatar sits above the text here
-    const GRID_PARALLAX = 0.2; // the dot grid follows 20% of the scroll
-    const GRID_TILE = 40;      // must match the grid's background-size in styles.css
-
-    if (bgGrid || hero) {
-        let heroEnd = 1;           // scroll position where the hero has fully left the screen
-        let lastHeroDistance = -1;
-
-        const measureHero = () => {
-            if (hero) heroEnd = Math.max(1, hero.offsetTop + hero.offsetHeight);
-            lastHeroDistance = -1;
-        };
-
-        const clearParallax = () => {
-            if (bgGrid) bgGrid.style.removeProperty('--grid-shift');
-            [heroBg, heroContent, heroAvatar].forEach(el => {
-                if (el) {
-                    el.style.translate = '';
-                    el.style.opacity = '';
-                }
-            });
-            lastHeroDistance = -1;
-        };
-
-        const updateParallax = () => {
-            const strength = parallaxStrength();
-            if (strength === 0) {
-                clearParallax();
-                return;
-            }
-            const scrollY = Math.max(0, window.scrollY);
-
-            if (bgGrid) {
-                // Slide within one tile: the pattern repeats, so it reads as endless slow movement
-                const shift = (scrollY * GRID_PARALLAX * strength) % GRID_TILE;
-                bgGrid.style.setProperty('--grid-shift', `${-shift}px`);
-            }
-
-            // Once the hero is off screen its layers stay where they are
-            const distance = Math.min(scrollY, heroEnd) * strength;
-            if (hero && distance !== lastHeroDistance) {
-                lastHeroDistance = distance;
-                // The node graph lags furthest behind, the avatar a little; the text floats up and fades
-                if (heroBg) heroBg.style.translate = `0 ${(distance * 0.45).toFixed(1)}px`;
-                if (heroAvatar) {
-                    heroAvatar.style.translate = stackedHero.matches ? '' : `0 ${(distance * 0.2).toFixed(1)}px`;
-                }
-                if (heroContent) {
-                    heroContent.style.translate = `0 ${(-distance * 0.1).toFixed(1)}px`;
-                    const progress = Math.min(1, scrollY / heroEnd);
-                    const fade = Math.min(1, Math.max(0, (progress - 0.25) / 0.75));
-                    heroContent.style.opacity = (1 - fade * 0.85).toFixed(3);
-                }
-            }
-        };
-
-        let parallaxQueued = false;
-        const queueParallax = () => {
-            if (parallaxQueued) return;
-            parallaxQueued = true;
-            requestAnimationFrame(() => {
-                parallaxQueued = false;
-                updateParallax();
-            });
-        };
-        const remeasure = () => {
-            measureHero();
-            queueParallax();
-        };
-
-        measureHero();
-        updateParallax();
-        window.addEventListener('scroll', queueParallax, { passive: true });
-        window.addEventListener('resize', remeasure);
-        [reducedMotion, smallScreen, stackedHero].forEach(query => query.addEventListener('change', remeasure));
+    // --- Pixel field: the page background ---
+    // Orange pixel-art sparks (little starbursts, crosses and single pixels) cover the whole page in
+    // three depth layers. Each layer follows a different share of the scroll, so near sparks slide past
+    // faster than far ones. Where a spark sits is worked out from its grid cell alone, so the pattern
+    // is the same on every visit and carries on for as long as the page does.
+    let field = document.getElementById('pixel-field');
+    if (!field) {
+        // Project pages do not carry the canvas in their markup
+        field = document.createElement('canvas');
+        field.id = 'pixel-field';
+        field.setAttribute('aria-hidden', 'true');
+        document.body.prepend(field);
     }
 
-    // --- Background Particles ---
-    // Slow-drifting dots in three depth layers, with faint links between neighbours of the same layer
-    // (echoing the hero node graph). When scrolling, far layers follow less of the scroll than near ones.
-    const particleCanvas = document.getElementById('bg-particles');
+    if (field.getContext) {
+        const ctx = field.getContext('2d');
 
-    if (particleCanvas && particleCanvas.getContext) {
-        const ctx = particleCanvas.getContext('2d');
-        const LINK_DISTANCE = 130;
-        const WRAP_MARGIN = 10;
-        // Far to near: share of the dots, how much of the scroll the layer follows, dot size and brightness
-        const DEPTH_LAYERS = [
-            { share: 0.5, parallax: 0.08, rMin: 0.4, rMax: 0.9, alpha: 0.25 },
-            { share: 0.3, parallax: 0.18, rMin: 0.7, rMax: 1.4, alpha: 0.4 },
-            { share: 0.2, parallax: 0.32, rMin: 1.2, rMax: 2.0, alpha: 0.6 }
-        ];
-        let particles = [];
+        // Sprites, one character per pixel
+        const SPRITES = {
+            dot: ['#'],
+            plus3: [
+                '.#.',
+                '###',
+                '.#.'
+            ],
+            plus5: [
+                '..#..',
+                '..#..',
+                '#####',
+                '..#..',
+                '..#..'
+            ],
+            burst5: [
+                '#.#.#',
+                '.###.',
+                '#####',
+                '.###.',
+                '#.#.#'
+            ],
+            spark7: [
+                '...#...',
+                '.#.#.#.',
+                '..###..',
+                '#######',
+                '..###..',
+                '.#.#.#.',
+                '...#...'
+            ],
+            spark9: [
+                '....#....',
+                '.#..#..#.',
+                '..#.#.#..',
+                '...###...',
+                '#########',
+                '...###...',
+                '..#.#.#..',
+                '.#..#..#.',
+                '....#....'
+            ],
+            spark11: [
+                '.....#.....',
+                '.#...#...#.',
+                '..#..#..#..',
+                '...#.#.#...',
+                '....###....',
+                '###########',
+                '....###....',
+                '...#.#.#...',
+                '..#..#..#..',
+                '.#...#...#.',
+                '.....#.....'
+            ]
+        };
+        const sprite = (name) => {
+            const rows = SPRITES[name];
+            const pixels = [];
+            rows.forEach((row, y) => [...row].forEach((ch, x) => { if (ch === '#') pixels.push([x, y]); }));
+            return { size: rows.length, pixels };
+        };
+
+        // Far to near. px: size of one sprite pixel; cell: grid spacing; speed: share of the scroll the
+        // layer follows; fill: how many cells hold a spark; alpha: brightness
+        const LAYERS = [
+            { px: 2, cell: 46, speed: 0.08, fill: 0.62, alpha: 0.34, sprites: ['dot', 'dot', 'dot', 'plus3'] },
+            { px: 3, cell: 104, speed: 0.24, fill: 0.48, alpha: 0.5, sprites: ['plus3', 'burst5', 'plus5', 'dot', 'spark7'] },
+            { px: 4, cell: 230, speed: 0.5, fill: 0.4, alpha: 0.85, sprites: ['spark9', 'spark7', 'spark11', 'burst5'] }
+        ].map(layer => ({ ...layer, sprites: layer.sprites.map(sprite) }));
+        const COLORS = ['#ff6a2b', '#d97757', '#ff8f4d'];
+        const GLOW_RADIUS = 170; // sparks light up within this distance of the pointer
+
+        // Repeatable pseudo-random number in [0, 1) for a grid cell
+        const hash = (x, y, salt) => {
+            let h = Math.imul(x, 374761393) ^ Math.imul(y, 668265263) ^ Math.imul(salt, 362437);
+            h = Math.imul(h ^ (h >>> 13), 1274126177);
+            return ((h ^ (h >>> 16)) >>> 0) / 4294967296;
+        };
+
         let viewW = 0;
         let viewH = 0;
-        let rafId = 0;
+        let shownScroll = window.scrollY; // eased copy of the scroll position
+        let lastDrawn = -1;
+        let lastTwinkle = 0;
+        let pointerMoved = false;
 
-        const pickLayer = () => {
-            let roll = Math.random();
-            for (const layer of DEPTH_LAYERS) {
-                if (roll < layer.share) return layer;
-                roll -= layer.share;
-            }
-            return DEPTH_LAYERS[0];
-        };
-
-        // Keep a coordinate on screen (plus a small margin) by wrapping it around the edges
-        const wrap = (value, size) => {
-            const span = size + WRAP_MARGIN * 2;
-            return ((value + WRAP_MARGIN) % span + span) % span - WRAP_MARGIN;
-        };
-
-        const setupParticles = () => {
+        const resizeField = () => {
             const dpr = Math.min(window.devicePixelRatio || 1, 2);
-            // Use the canvas's displayed size (the viewport minus any scrollbar)
-            viewW = particleCanvas.clientWidth;
-            viewH = particleCanvas.clientHeight;
-            particleCanvas.width = Math.round(viewW * dpr);
-            particleCanvas.height = Math.round(viewH * dpr);
+            viewW = field.clientWidth;
+            viewH = field.clientHeight;
+            field.width = Math.round(viewW * dpr);
+            field.height = Math.round(viewH * dpr);
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            lastDrawn = -1;
+        };
 
-            // Scale the count with screen area so phones stay light
-            const count = Math.min(70, Math.round((viewW * viewH) / 20000));
-            particles = Array.from({ length: count }, () => {
-                const layer = pickLayer();
-                return {
-                    x: Math.random() * viewW,
-                    y: Math.random() * viewH,
-                    vx: (Math.random() - 0.5) * 0.3,
-                    vy: (Math.random() - 0.5) * 0.3,
-                    r: layer.rMin + Math.random() * (layer.rMax - layer.rMin),
-                    layer,
-                    accent: Math.random() < 0.15,
-                    sy: 0 // on-screen y after the scroll parallax
-                };
+        const drawField = (time) => {
+            const strength = parallaxStrength();
+            ctx.clearRect(0, 0, viewW, viewH);
+
+            LAYERS.forEach((layer, li) => {
+                const { px, cell } = layer;
+                const offset = Math.round(shownScroll * layer.speed * strength);
+                const firstRow = Math.floor(offset / cell) - 1;
+                const rows = Math.ceil(viewH / cell) + 2;
+                const cols = Math.ceil(viewW / cell) + 1;
+
+                for (let r = 0; r < rows; r++) {
+                    const row = firstRow + r;
+                    for (let col = -1; col < cols; col++) {
+                        if (hash(col, row, li) > layer.fill) continue;
+                        const sp = layer.sprites[Math.floor(hash(col, row, li + 11) * layer.sprites.length)];
+                        // Nudge the spark inside its cell, staying on the layer's pixel grid
+                        const room = Math.max(1, Math.floor(cell / px) - sp.size);
+                        const x = col * cell + Math.floor(hash(col, row, li + 23) * room) * px;
+                        const y = row * cell + Math.floor(hash(col, row, li + 37) * room) * px - offset;
+                        const half = (sp.size * px) / 2;
+                        if (y > viewH || y + half * 2 < 0) continue;
+
+                        // Twinkle in three steps rather than a smooth fade, to keep the pixel-art feel
+                        const phase = hash(col, row, li + 53);
+                        const wave = strength === 0 ? 1 : Math.sin(time * (0.5 + phase) + phase * 40);
+                        let alpha = layer.alpha * (wave > 0.3 ? 1 : wave > -0.4 ? 0.7 : 0.4);
+
+                        if (mouse.seen) {
+                            const near = 1 - Math.hypot(mouse.x - (x + half), mouse.y - (y + half)) / GLOW_RADIUS;
+                            if (near > 0) alpha += near * 0.6;
+                        }
+
+                        ctx.globalAlpha = Math.min(1, alpha);
+                        ctx.fillStyle = COLORS[Math.floor(hash(col, row, li + 71) * COLORS.length)];
+                        for (const [sx, sy] of sp.pixels) ctx.fillRect(x + sx * px, y + sy * px, px, px);
+                    }
+                }
+            });
+            ctx.globalAlpha = 1;
+        };
+
+        const tickField = (now) => {
+            // Ease towards the real scroll position so the layers glide instead of jumping
+            const target = window.scrollY;
+            shownScroll = Math.abs(target - shownScroll) < 0.5 ? target : lerp(shownScroll, target, 0.14);
+
+            const twinkleDue = !reducedMotion.matches && now - lastTwinkle > 110;
+            if (shownScroll !== lastDrawn || twinkleDue || pointerMoved) {
+                if (twinkleDue) lastTwinkle = now;
+                lastDrawn = shownScroll;
+                pointerMoved = false;
+                drawField(now / 1000);
+            }
+            requestAnimationFrame(tickField);
+        };
+
+        resizeField();
+        requestAnimationFrame(tickField);
+        window.addEventListener('resize', resizeField);
+        window.addEventListener('mousemove', () => { pointerMoved = true; }, { passive: true });
+        [reducedMotion, smallScreen].forEach(query => query.addEventListener('change', () => { lastDrawn = -1; }));
+    }
+
+    // --- Scroll progress bar and hero parallax ---
+    // The hero text drifts up and fades as you scroll away, and the photo lags a little behind it.
+    // Only the `translate` property and opacity are touched, so the scroll-reveal transforms are left alone.
+    const progressBar = document.getElementById('scrollProgress');
+    const hero = document.getElementById('hero');
+    const heroText = hero ? hero.querySelector('.hero-text') : null;
+    const heroAvatar = hero ? hero.querySelector('.hero-avatar') : null;
+    const heroCue = hero ? hero.querySelector('.scroll-cue') : null;
+    const stackedHero = window.matchMedia('(max-width: 1024px)'); // the photo sits above the text here
+
+    if (progressBar || hero) {
+        const updateScrollEffects = () => {
+            const scrollY = Math.max(0, window.scrollY);
+
+            if (progressBar) {
+                const range = document.documentElement.scrollHeight - window.innerHeight;
+                progressBar.style.setProperty('--progress', range > 0 ? Math.min(1, scrollY / range).toFixed(4) : '0');
+            }
+
+            if (!hero) return;
+            const strength = parallaxStrength();
+            if (strength === 0) {
+                [heroText, heroAvatar, heroCue].forEach(el => {
+                    if (el) {
+                        el.style.translate = '';
+                        el.style.opacity = '';
+                    }
+                });
+                return;
+            }
+            const heroEnd = Math.max(1, hero.offsetTop + hero.offsetHeight);
+            const progress = Math.min(1, scrollY / heroEnd);
+            const distance = Math.min(scrollY, heroEnd) * strength;
+            if (heroText) {
+                heroText.style.translate = `0 ${(-distance * 0.16).toFixed(1)}px`;
+                heroText.style.opacity = (1 - Math.max(0, (progress - 0.2) / 0.7)).toFixed(3);
+            }
+            if (heroAvatar) {
+                heroAvatar.style.translate = stackedHero.matches ? '' : `0 ${(distance * 0.14).toFixed(1)}px`;
+                heroAvatar.style.opacity = (1 - Math.max(0, (progress - 0.35) / 0.6)).toFixed(3);
+            }
+            if (heroCue) heroCue.style.opacity = (1 - Math.min(1, progress * 6)).toFixed(3);
+        };
+
+        let effectsQueued = false;
+        const queueScrollEffects = () => {
+            if (effectsQueued) return;
+            effectsQueued = true;
+            requestAnimationFrame(() => {
+                effectsQueued = false;
+                updateScrollEffects();
             });
         };
 
-        const drawParticles = () => {
-            // Each layer follows its own share of the scroll; wrapping keeps the screen filled
-            const scrollShift = Math.max(0, window.scrollY) * parallaxStrength();
-            for (const p of particles) {
-                p.sy = wrap(p.y - scrollShift * p.layer.parallax, viewH);
-            }
+        updateScrollEffects();
+        window.addEventListener('scroll', queueScrollEffects, { passive: true });
+        window.addEventListener('resize', queueScrollEffects);
+        [reducedMotion, smallScreen, stackedHero].forEach(query => query.addEventListener('change', queueScrollEffects));
+    }
 
-            ctx.clearRect(0, 0, viewW, viewH);
+    // --- Navigation: mark the link of the section on screen ---
+    const sectionLinks = new Map();
+    document.querySelectorAll('.nav-link[href^="#"]').forEach(link => {
+        const section = document.getElementById(link.getAttribute('href').slice(1));
+        if (section) sectionLinks.set(section, link);
+    });
+    if (sectionLinks.size) {
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) return;
+                sectionLinks.forEach(link => link.classList.remove('active'));
+                sectionLinks.get(entry.target).classList.add('active');
+            });
+        }, { rootMargin: '-45% 0px -50% 0px' });
+        sectionLinks.forEach((link, section) => sectionObserver.observe(section));
+        // Above the first section (in the hero) no link is marked
+        if (hero) {
+            new IntersectionObserver(([entry]) => {
+                if (entry.isIntersecting) sectionLinks.forEach(link => link.classList.remove('active'));
+            }, { rootMargin: '-45% 0px -50% 0px' }).observe(hero);
+        }
+    }
 
-            // Faint lines between nearby particles of the same layer (nearer layers a bit brighter)
-            ctx.lineWidth = 1;
-            for (let i = 0; i < particles.length; i++) {
-                for (let j = i + 1; j < particles.length; j++) {
-                    const a = particles[i];
-                    const b = particles[j];
-                    if (a.layer !== b.layer) continue;
-                    const dist = Math.hypot(a.x - b.x, a.sy - b.sy);
-                    if (dist < LINK_DISTANCE) {
-                        ctx.strokeStyle = `rgba(255, 255, 255, ${0.15 * a.layer.alpha * (1 - dist / LINK_DISTANCE)})`;
-                        ctx.beginPath();
-                        ctx.moveTo(a.x, a.sy);
-                        ctx.lineTo(b.x, b.sy);
-                        ctx.stroke();
-                    }
-                }
-            }
+    // --- Projects carousel ---
+    // Move between projects with the arrow buttons, the dots, the keyboard arrows, a swipe or
+    // trackpad scroll, or by dragging with the mouse.
+    const carousel = document.getElementById('projCarousel');
+    if (carousel) {
+        const slides = Array.from(carousel.querySelectorAll('.slide'));
+        const prevBtn = document.getElementById('projPrev');
+        const nextBtn = document.getElementById('projNext');
+        const countEl = document.getElementById('projCount');
+        const dotsEl = document.getElementById('projDots');
+        const pad = (n) => String(n).padStart(2, '0');
+        let current = 0;
 
-            // Dots: bigger and brighter the nearer the layer, a few of them in the accent orange
-            for (const p of particles) {
-                const alpha = p.accent ? Math.min(1, p.layer.alpha * 1.5) : p.layer.alpha;
-                ctx.fillStyle = p.accent ? `rgba(255, 87, 34, ${alpha})` : `rgba(255, 255, 255, ${alpha})`;
-                ctx.beginPath();
-                ctx.arc(p.x, p.sy, p.r, 0, Math.PI * 2);
-                ctx.fill();
-            }
+        // Scroll position at which a slide sits at the left edge
+        const slideLeft = (i) => slides[i].offsetLeft - slides[0].offsetLeft;
+        const nearestSlide = () => {
+            let best = 0;
+            slides.forEach((slide, i) => {
+                if (Math.abs(slideLeft(i) - carousel.scrollLeft) < Math.abs(slideLeft(best) - carousel.scrollLeft)) best = i;
+            });
+            return best;
         };
 
-        const moveParticles = () => {
-            for (const p of particles) {
-                p.x += p.vx;
-                p.y += p.vy;
-                // Wrap around the screen edges
-                if (p.x < -10) p.x = viewW + 10;
-                else if (p.x > viewW + 10) p.x = -10;
-                if (p.y < -10) p.y = viewH + 10;
-                else if (p.y > viewH + 10) p.y = -10;
-            }
-        };
-
-        const tick = () => {
-            moveParticles();
-            drawParticles();
-            rafId = requestAnimationFrame(tick);
-        };
-
-        // Visitors who ask for reduced motion get a still frame instead of an animation
-        const startParticles = () => {
-            cancelAnimationFrame(rafId);
-            if (reducedMotion.matches) {
-                drawParticles();
-            } else {
-                rafId = requestAnimationFrame(tick);
-            }
-        };
-
-        setupParticles();
-        startParticles();
-        reducedMotion.addEventListener('change', startParticles);
-
-        let resizeTimer;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => {
-                setupParticles();
-                if (reducedMotion.matches) drawParticles();
-            }, 200);
+        const dots = slides.map((slide, i) => {
+            const dot = document.createElement('button');
+            dot.type = 'button';
+            dot.className = 'carousel-dot';
+            dot.setAttribute('aria-label', `Project ${i + 1}`);
+            dot.addEventListener('click', () => goTo(i));
+            if (dotsEl) dotsEl.appendChild(dot);
+            return dot;
         });
+
+        const render = () => {
+            slides.forEach((slide, i) => slide.classList.toggle('is-active', i === current));
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('is-active', i === current);
+                dot.setAttribute('aria-current', i === current ? 'true' : 'false');
+            });
+            if (countEl) countEl.textContent = `${pad(current + 1)} / ${pad(slides.length)}`;
+            if (prevBtn) prevBtn.disabled = current === 0;
+            if (nextBtn) nextBtn.disabled = current === slides.length - 1;
+        };
+
+        function goTo(i) {
+            current = Math.max(0, Math.min(slides.length - 1, i));
+            render();
+            carousel.scrollTo({ left: slideLeft(current), behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+        }
+
+        if (prevBtn) prevBtn.addEventListener('click', () => goTo(current - 1));
+        if (nextBtn) nextBtn.addEventListener('click', () => goTo(current + 1));
+
+        carousel.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                goTo(current + 1);
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                goTo(current - 1);
+            }
+        });
+
+        // Swipes and trackpad scrolling move the strip themselves; follow along once it settles
+        let settleTimer;
+        carousel.addEventListener('scroll', () => {
+            clearTimeout(settleTimer);
+            settleTimer = setTimeout(() => {
+                if (drag.active) return;
+                const nearest = nearestSlide();
+                if (nearest !== current) {
+                    current = nearest;
+                    render();
+                }
+            }, 90);
+        }, { passive: true });
+
+        // Drag with the mouse (touch already scrolls natively)
+        const drag = { active: false, moved: false, startX: 0, startScroll: 0 };
+        carousel.addEventListener('pointerdown', (e) => {
+            if (e.pointerType !== 'mouse' || e.button !== 0) return;
+            drag.active = true;
+            drag.moved = false;
+            drag.startX = e.clientX;
+            drag.startScroll = carousel.scrollLeft;
+        });
+        window.addEventListener('pointermove', (e) => {
+            if (!drag.active) return;
+            const dx = e.clientX - drag.startX;
+            if (!drag.moved && Math.abs(dx) > 5) {
+                drag.moved = true;
+                carousel.classList.add('is-dragging');
+            }
+            if (drag.moved) carousel.scrollLeft = drag.startScroll - dx;
+        });
+        const endDrag = (e) => {
+            if (!drag.active) return;
+            drag.active = false;
+            if (!drag.moved) return;
+            const dx = e.clientX - drag.startX;
+            // A decisive pull moves one project on; a small one settles on whichever is nearest
+            const target = dx < -70 ? current + 1 : dx > 70 ? current - 1 : nearestSlide();
+            // Leave the drag styling on until the glide starts, so scroll snapping does not jump first
+            requestAnimationFrame(() => {
+                goTo(target);
+                carousel.classList.remove('is-dragging');
+            });
+        };
+        window.addEventListener('pointerup', endDrag);
+        window.addEventListener('pointercancel', endDrag);
+        // A drag that ends over a link must not open it
+        carousel.addEventListener('click', (e) => {
+            if (drag.moved) {
+                e.preventDefault();
+                e.stopPropagation();
+                drag.moved = false;
+            }
+        }, true);
+
+        window.addEventListener('resize', () => carousel.scrollTo({ left: slideLeft(current), behavior: 'auto' }));
+        render();
     }
 
     // --- Interactive Click Effects ---
@@ -447,16 +589,19 @@ document.addEventListener('DOMContentLoaded', () => {
             skill_3: "原生 CSS 样式设计",
             skill_4: "交互式动画",
             projects_title: "精选作品",
+            projects_hint: "拖动、滑动或点击箭头切换",
+            project_view: "查看项目",
+            hero_scroll: "向下滚动",
             project_1_title: "带我飞向月球 (ISD 60504)",
             project_1_desc: "基于 p5.js 和 ml5.js 开发的双人互动基于手势追踪的游戏。",
             project_2_title: "ChoraNomad - 3D 房间原型",
-            project_2_desc: "用 Three.js 制作的街边玻璃共享工作间原型：预约、付款、扫码进门，并在 3D 空间里体验线上会议。",
+            project_2_desc: "用 Three.js 制作的雨夜街边玻璃共享工作间原型：预约、付款、扫码进门，并在 3D 空间里体验线上会议。",
             project_3_title: "AutoFigma-AppDesign（Figma 自动设计）",
             project_3_desc: "一个 Claude Code 技能：参考真实的 Behance 作品，在 Figma 里设计整个 iOS App，并避免“AI 味”。",
             bento_badge: "学习博客",
             bento_title: "我的学术进展",
             bento_desc: "深入了解我在泰莱大学（Taylor's University）期间的反思、项目文档以及创意发展过程。",
-            bento_link: '阅读博客 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+            bento_link: '阅读博客 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>',
             contact_title: "保持联系",
             contact_desc: "点击下方的按钮直接通过邮件与我联系。我会尽快回复您！",
             contact_submit: "邮件联系我",
