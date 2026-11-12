@@ -1,0 +1,48 @@
+/* Additions for the rainy-night add-on (enhance.js). The base styles live in assets/index-*.css. */
+
+/* The scene is a night street now, so the labels that sit directly on it need light text */
+.brand .logo {
+    color: #f2f0e9;
+}
+
+.brand .sub {
+    color: #b9c2b3;
+}
+
+.loading {
+    background: #0c0f14;
+    color: #b9c2b3;
+}
+
+html,
+body {
+    background: #0c0f14;
+}
+
+/* Way back to the portfolio home page */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #252e26;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    pointer-events: auto;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    transition: background 0.2s, transform 0.2s;
+}
+
+.back-link:hover {
+    background: #c4e58d;
+    transform: translateX(-2px);
+}
+
+.back-link:focus-visible {
+    outline: 2px solid #c4e58d;
+    outline-offset: 2px;
+}
