@@ -14,6 +14,7 @@ It is a small static site: plain HTML, CSS and JavaScript, with no build step. E
 - **Background**: a "pixel black" page covered in orange pixel-art sparks, drawn on a canvas by `app.js` in three depth layers. The layers follow the scroll at different speeds (parallax), twinkle, and light up near the pointer.
 - **Motion**: scroll parallax, a scroll progress bar, a custom cursor and click effects. All of it respects the visitor's "reduce motion" setting, and the parallax is gentler on phones.
 - **Responsive layout** with a mobile menu.
+- **Visitor stats**: [Vercel Web Analytics](https://vercel.com/docs/analytics) is added to every page with two script tags. It also has to be switched on once in the Vercel dashboard (project → Analytics → Enable), otherwise nothing is counted.
 
 ## Project: Lighting Design
 
