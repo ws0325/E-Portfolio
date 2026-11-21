@@ -1192,8 +1192,8 @@ function init({ THREE: T, scene, camera, renderer, room, state }) {
                 if (dot(n.xz, normalize(vWorld.xz)) < 0.25 || abs(n.y) > 0.5) discard;
                 vec2 uv = vec2(dot(vWorld.xz, vec2(-n.z, n.x)), vWorld.y);
 
-                vec3 small = beads(uv, 0.02, 0.32);
-                vec3 big = beads(uv + 3.1, 0.045, 0.18);
+                vec3 small = beads(uv, 0.026, 0.2);
+                vec3 big = beads(uv + 3.1, 0.06, 0.09);
 
                 // Runners: one drop per column, sliding down with a thin trail above it
                 float col = uv.x / 0.07, id = floor(col);
@@ -1209,9 +1209,13 @@ function init({ THREE: T, scene, camera, renderer, room, state }) {
 
                 float mask = max(max(small.x, big.x), head);
                 vec2 inside = mix(small.yz, big.yz, step(small.x, big.x));
-                float highlight = smoothstep(0.1, 0.9, dot(inside, normalize(vec2(-0.6, 0.8))));
-                vec3 color = mix(vec3(0.05, 0.07, 0.09), vec3(0.34, 0.38, 0.44), highlight * 0.8 + head * 0.4);
-                float alpha = (mask * 0.42 + trail * 0.16) * uRain;
+                // A drop on glass is a faint cool smear with a bright speck of light in one corner.
+                // It must never be darker than the view behind it, or it reads as dirt on the screen.
+                float speck = smoothstep(0.55, 0.95, dot(inside, normalize(vec2(-0.6, 0.8))));
+                vec3 color = mix(vec3(0.62, 0.7, 0.8), vec3(1.0), speck);
+                // Fade out up close, so drops never fill the screen from inside the room
+                float near = smoothstep(0.5, 1.8, distance(cameraPosition, vWorld));
+                float alpha = (mask * 0.12 + mask * speck * 0.3 + trail * 0.05) * uRain * near;
                 if (alpha < 0.01) discard;
                 gl_FragColor = vec4(color, alpha);
             }

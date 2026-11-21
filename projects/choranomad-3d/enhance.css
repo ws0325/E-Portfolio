@@ -46,3 +46,40 @@ body {
     outline: 2px solid #c4e58d;
     outline-offset: 2px;
 }
+
+/* The call bar and the pop-up messages are dark panels laid over the 3D view. Make them lighter and
+   smaller so they cover less of the room, and stop the call bar running off the side of a phone. */
+.callbar {
+    background: rgba(24, 29, 25, 0.62);
+    max-width: calc(100% - 24px);
+}
+
+.toast {
+    background: rgba(30, 36, 31, 0.78);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+}
+
+@media (max-width: 760px) {
+    .callbar {
+        flex-wrap: wrap;
+        justify-content: center;
+        bottom: 70px;
+        gap: 4px;
+        padding: 6px;
+        border-radius: 14px;
+    }
+
+    .callbar button {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    /* Below the status pills (which sit at 64px) instead of on top of them */
+    .toast {
+        top: 112px;
+        padding: 8px 14px;
+        font-size: 13px;
+        border-radius: 12px;
+    }
+}
