@@ -911,7 +911,7 @@ function init({ THREE: T, scene, camera, renderer, room, state }) {
                     }`)
                 .replace('#include <roughnessmap_fragment>', /* glsl */ `#include <roughnessmap_fragment>
                     roughnessFactor = mix(roughnessFactor, 0.34, wetDamp);
-                    roughnessFactor = mix(roughnessFactor, 0.05, wetPuddle);`)
+                    roughnessFactor = mix(roughnessFactor, 0.16, wetPuddle);`)
                 .replace('#include <normal_fragment_maps>', /* glsl */ `#include <normal_fragment_maps>
                     normal = normalize(mix(normal, nonPerturbedNormal, wetPuddle)
                         + mat3(viewMatrix) * vec3(wetTilt.x, 0.0, wetTilt.y) * 0.35);`)
@@ -919,14 +919,16 @@ function init({ THREE: T, scene, camera, renderer, room, state }) {
                     if (uReflect > 0.5) {
                         vec3 toEye = normalize(cameraPosition - vWetPos);
                         float fresnel = 0.06 + 0.94 * pow(1.0 - clamp(toEye.y, 0.0, 1.0), 3.0);
+                        if (vReflectUv.w <= 0.0) fresnel = 0.0; // behind the mirror camera: nothing to show
                         vec4 ruv = vReflectUv;
                         ruv.xy += wetTilt * 0.035 * ruv.w;
                         // Sharp mirror in the puddles, a soft blurred sheen on merely damp ground
-                        vec3 sharp = texture2DProj(tReflect, ruv, 0.6).rgb;
-                        vec3 soft = texture2DProj(tReflect, ruv, 4.5).rgb;
+                        vec3 sharp = min(textureProjLod(tReflect, ruv, 0.6).rgb, vec3(8.0));
+                        vec3 soft = min(textureProjLod(tReflect, ruv, 4.5).rgb, vec3(8.0));
                         vec3 mirrored = mix(soft * 0.38 * wetDamp, sharp, wetPuddle);
                         outgoingLight += mirrored * fresnel;
                     }
+                    outgoingLight = min(outgoingLight, vec3(12.0));
                     #include <opaque_fragment>`);
         };
         mat.needsUpdate = true;
@@ -976,6 +978,37 @@ function init({ THREE: T, scene, camera, renderer, room, state }) {
         reflectHidden.forEach((o, i) => (o.visible = visible[i]));
     }
     reflectHidden.push(...grounds);
+
+    // ================================================================ safety: keep the picture finite
+
+    // The scene is drawn into a half-float buffer, which overflows to Infinity above 65 504. A very
+    // bright, very sharp highlight (a street lamp mirrored in a puddle) can get there, and the bloom
+    // blur then smears the overflow into large black rectangles. This pass runs just before the bloom
+    // and clamps every pixel to a sane range (and turns any NaN into black), so that cannot happen.
+    const composer = ctx.composer;
+    if (composer && T.ShaderPass) {
+        const limit = new T.ShaderPass({
+            uniforms: { tDiffuse: { value: null } },
+            vertexShader: /* glsl */ `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: /* glsl */ `
+                uniform sampler2D tDiffuse;
+                varying vec2 vUv;
+                void main() {
+                    vec4 texel = texture2D(tDiffuse, vUv);
+                    vec3 c = texel.rgb;
+                    if (any(isnan(c)) || any(isinf(c))) c = vec3(0.0);
+                    gl_FragColor = vec4(clamp(c, 0.0, 16.0), clamp(texel.a, 0.0, 1.0));
+                }
+            `
+        });
+        composer.insertPass(limit, 1); // after the scene pass, before the bloom pass
+    }
 
     // ================================================================ 4. rain
 
